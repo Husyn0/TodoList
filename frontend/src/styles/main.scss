@@ -1,0 +1,65 @@
+@use 'variables' as *;
+@use 'auth';
+@use 'tasks';
+@use 'dashboard';
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: $bg;
+  color: $text;
+}
+button { cursor: pointer; font: inherit; }
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+
+  .sidebar {
+    width: 240px;
+    background: $surface;
+    border-right: 1px solid $border;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    h2 { margin: 0; }
+    nav {
+      display: flex; flex-direction: column; gap: 6px;
+      a {
+        padding: 10px 12px; border-radius: 8px; color: $text;
+        text-decoration: none; transition: .15s;
+        &:hover { background: $bg; }
+        &.active { background: $primary; color: white; }
+      }
+    }
+    .user-box {
+      margin-top: auto;
+      display: flex; flex-direction: column; gap: 8px;
+      font-size: 14px;
+      button {
+        background: $danger; color: white; border: none;
+        padding: 8px; border-radius: 6px;
+      }
+    }
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 32px;
+    overflow: auto;
+  }
+}
+
+.loading {
+  display: grid; place-items: center; height: 100vh; color: $muted;
+}
+
+.toast {
+  background: $primary; color: white;
+  padding: 10px 14px; border-radius: 8px;
+  margin-bottom: 16px;
+  display: inline-block;
+}

@@ -1,0 +1,144 @@
+@use 'variables' as *;
+
+.tasks-page {
+  display: flex; flex-direction: column; gap: 20px;
+  height: 100%;
+
+  .tasks-header {
+    display: flex; justify-content: space-between; align-items: center;
+    h1 { margin: 0; }
+    .week-nav {
+      display: flex; gap: 12px; align-items: center;
+      button {
+        background: $surface; border: 1px solid $border;
+        width: 36px; height: 36px; border-radius: 8px;
+        &:hover { background: $bg; }
+      }
+      span { font-size: 14px; color: $muted; }
+    }
+  }
+
+  .week-board {
+    display: flex; gap: 12px;
+    flex: 1;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+}
+
+.day-column {
+  flex: 1 0 220px;
+  min-width: 220px;
+  background: $surface;
+  border-radius: $radius;
+  border: 1px solid $border;
+  padding: 12px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: background .15s, border-color .15s;
+
+  &.over { background: rgba($primary, .06); border-color: $primary; }
+
+  header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 8px;
+    border-bottom: 1px solid $border;
+    span { font-weight: 600; }
+    small { color: $muted; }
+  }
+
+  .tasks-list {
+    flex: 1;
+    display: flex; flex-direction: column; gap: 8px;
+    overflow-y: auto;
+    min-height: 60px;
+  }
+
+  .add-task-btn {
+    background: transparent;
+    border: 1px dashed $border;
+    color: $muted;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 18px;
+    transition: .15s;
+    &:hover { background: $primary; color: white; border-color: $primary; }
+  }
+}
+
+.task-card {
+  background: white;
+  border: 1px solid $border;
+  border-left: 4px solid $medium;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: grab;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+  transition: box-shadow .15s, transform .15s;
+
+  &:hover { box-shadow: $shadow; }
+  &.dragging { opacity: .3; }
+  &.preview { cursor: grabbing; transform: rotate(2deg); box-shadow: $shadow; }
+
+  &.priority-low { border-left-color: $low; }
+  &.priority-medium { border-left-color: $medium; }
+  &.priority-high { border-left-color: $high; }
+  &.status-done .task-title { text-decoration: line-through; color: $muted; }
+
+  .task-title { font-weight: 600; font-size: 14px; }
+  .task-desc { margin: 4px 0 0; font-size: 12px; color: $muted; }
+  .task-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 8px;
+  }
+  .badge {
+    font-size: 11px; padding: 2px 8px; border-radius: 20px;
+    text-transform: capitalize;
+    &.low { background: rgba($low, .15); color: $low; }
+    &.medium { background: rgba($medium, .15); color: $medium; }
+    &.high { background: rgba($high, .15); color: $high; }
+  }
+  .task-actions button {
+    background: transparent; border: none;
+    font-size: 13px; color: $muted; padding: 2px 4px;
+    &:hover { color: $text; }
+  }
+}
+
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(15, 20, 40, .5);
+  display: grid; place-items: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.modal {
+  background: white;
+  padding: 28px;
+  border-radius: $radius;
+  width: 100%; max-width: 480px;
+  display: flex; flex-direction: column; gap: 14px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.25);
+
+  h2 { margin: 0; }
+  label {
+    display: flex; flex-direction: column; gap: 4px;
+    font-size: 13px; color: $muted; font-weight: 500;
+  }
+  input, textarea, select {
+    padding: 10px 12px; border: 1px solid $border;
+    border-radius: 8px; font: inherit; color: $text;
+    &:focus { outline: 2px solid $primary; border-color: $primary; }
+  }
+  textarea { resize: vertical; min-height: 70px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions {
+    display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;
+    button {
+      padding: 10px 18px; border-radius: 8px; border: 1px solid $border;
+      background: white;
+      &[type="submit"] { background: $primary; color: white; border-color: $primary; }
+      &[type="submit"]:hover { background: $primary-dark; }
+    }
+  }
+}

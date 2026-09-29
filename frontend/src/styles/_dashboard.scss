@@ -1,0 +1,19 @@
+@use 'variables' as *;
+
+.dashboard-page {
+  h1 { margin-top: 0; }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .stat-card {
+    background: $surface;
+    padding: 24px;
+    border-radius: $radius;
+    border: 1px solid $border;
+    box-shadow: $shadow;
+    h3 { margin: 0; font-size: 32px; color: $primary; }
+    p { margin: 6px 0 0; color: $muted; }
+  }
+}
