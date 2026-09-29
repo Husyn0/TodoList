@@ -155,13 +155,13 @@ curl -i -X PUT http://localhost:8000/api/settings/password \
   }' | jq
 ```
 ### Verify the new password works:
-bash
+```bash
 
 curl -s -X POST http://localhost:8000/api/login \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -d '{"email":"test@example.com","password":"newpassword123"}' | jq '.token'
-
+```
 ###  💡 Change it back if you want to keep using password123:
 ```bash
 curl -X PUT http://localhost:8000/api/settings/password \
