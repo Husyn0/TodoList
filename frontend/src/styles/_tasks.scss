@@ -86,7 +86,84 @@
   &.priority-high   { border-left-color: $high; }
   &.status-done .task-title { text-decoration: line-through; color: $muted; }
 
-  .task-title { font-weight: 600; font-size: 14px; }
+
+    // ---- checkbox + title row ----
+  .task-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .task-check {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    margin-top: 1px;    // optical alignment with the title's first line
+    cursor: pointer;
+
+    input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .checkmark {
+      width: 16px;
+      height: 16px;
+      border: 2px solid $border;
+      border-radius: 5px;
+      background: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: .15s;
+      position: relative;
+
+      &::after {
+        content: '';
+        width: 4px;
+        height: 8px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg) scale(0);
+        transform-origin: center;
+        margin-top: -2px;
+        transition: transform .15s;
+      }
+    }
+
+    input:checked + .checkmark {
+      background: $primary;
+      border-color: $primary;
+      &::after { transform: rotate(45deg) scale(1); }
+    }
+
+    input:focus-visible + .checkmark {
+      outline: 2px solid $primary;
+      outline-offset: 2px;
+    }
+
+    input:disabled + .checkmark {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+  }
+
+  // title sits next to the checkbox
+  .task-title {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.3;
+    flex: 1;
+  }
+
   .task-desc  { margin: 4px 0 0; font-size: 12px; color: $muted; }
 
   // small repeat hint (still its own row, under description)

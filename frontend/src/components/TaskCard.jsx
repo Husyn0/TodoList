@@ -1,9 +1,17 @@
 import { useDraggable } from '@dnd-kit/core';
 import { PRIORITY_LETTER, describeRepeat } from '../constants/task';
 
-export default function TaskCard({ task, occurrenceDate, onEdit, onDelete, preview }) {
+export default function TaskCard({
+  task,
+  occurrenceDate,
+  onEdit,
+  onDelete,
+  onToggleDone,
+  preview,
+}) {
   const isRepeated = task.repeat && task.repeat.preset !== 'none';
   const repeatLabel = describeRepeat(task.repeat);
+  const isDone = task.status === 'done';
 
   // Only non-repeated tasks are draggable (until backend supports per-occurrence move)
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -25,7 +33,25 @@ export default function TaskCard({ task, occurrenceDate, onEdit, onDelete, previ
       {...(preview ? {} : listeners)}
       {...(preview ? {} : attributes)}
     >
-      <div className="task-title">{task.title}</div>
+      {/* Header row: checkbox + title */}
+      <div className="task-head">
+        <label
+          className="task-check"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <input
+            type="checkbox"
+            checked={isDone}
+            disabled={preview}
+            onChange={(e) => onToggleDone?.(task, e.target.checked)}
+          />
+          <span className="checkmark" />
+        </label>
+
+        <div className="task-title">{task.title}</div>
+      </div>
+
       {task.description && <p className="task-desc">{task.description}</p>}
 
       {repeatLabel && (

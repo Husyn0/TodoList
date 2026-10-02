@@ -19,7 +19,7 @@ const startOfWeek = (date, weekStart = 'monday') => {
 
 const fmt = (d) => d.toISOString().split('T')[0];
 
-function DayColumn({ date, tasks, onAdd, onEdit, onDelete }) {
+function DayColumn({ date, tasks, onAdd, onEdit, onDelete, onToggleDone }) {
   const key = fmt(date);
   const { setNodeRef, isOver } = useDroppable({ id: key });
 
@@ -32,11 +32,12 @@ function DayColumn({ date, tasks, onAdd, onEdit, onDelete }) {
       <div className="tasks-list">
         {tasks.map((t) => (
           <TaskCard
-            key={`${t.id}-${key}`}   // unique per (task, day) occurrence
+            key={`${t.id}-${key}`}
             task={t}
             occurrenceDate={key}
             onEdit={onEdit}
             onDelete={onDelete}
+            onToggleDone={onToggleDone}
           />
         ))}
       </div>
@@ -68,7 +69,6 @@ export default function Tasks() {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  // Fan out repeats across the visible week
   const tasksByDay = (date) =>
     tasks
       .filter((t) => occursOnDate(t, date))
@@ -87,11 +87,7 @@ export default function Tasks() {
     const targetDate = over.id;
     const task = tasks.find((t) => t.id === taskId);
     if (!task) return;
-
-    // Repeated tasks would need to move only one occurrence,
-    // which requires backend support — skip until then.
     if (task.repeat && task.repeat.preset !== 'none') return;
-
     if (task.due_date?.split('T')[0] === targetDate) return;
 
     setTasks((prev) =>
@@ -102,6 +98,22 @@ export default function Tasks() {
       await api.patch(`/tasks/${taskId}/move`, { due_date: targetDate });
     } catch {
       load();
+    }
+  };
+
+  // ---- NEW: toggle done/pending ----
+  const handleToggleDone = async (task, checked) => {
+    const nextStatus = checked ? 'done' : 'pending';
+
+    // optimistic update
+    setTasks((prev) =>
+      prev.map((t) => (t.id === task.id ? { ...t, status: nextStatus } : t))
+    );
+
+    try {
+      await api.put(`/tasks/${task.id}`, { status: nextStatus });
+    } catch {
+      load(); // rollback
     }
   };
 
@@ -158,6 +170,7 @@ export default function Tasks() {
               onAdd={(date) => setModal({ open: true, date, task: null })}
               onEdit={(task) => setModal({ open: true, date: null, task })}
               onDelete={handleDelete}
+              onToggleDone={handleToggleDone}
             />
           ))}
         </div>
