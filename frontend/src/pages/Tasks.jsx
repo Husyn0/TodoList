@@ -9,7 +9,7 @@ import AddTaskModal from '../components/AddTaskModal';
 
 const startOfWeek = (date, weekStart = 'monday') => {
   const d = new Date(date);
-  const day = d.getDay(); // 0 Sun … 6 Sat
+  const day = d.getDay();
   const diff = weekStart === 'monday' ? (day === 0 ? -6 : 1 - day) : -day;
   d.setDate(d.getDate() + diff);
   d.setHours(0, 0, 0, 0);
@@ -75,11 +75,10 @@ export default function Tasks() {
     if (!over) return;
 
     const taskId = active.id;
-    const targetDate = over.id; // droppable id = date string
+    const targetDate = over.id;
     const task = tasks.find((t) => t.id === taskId);
     if (!task || task.due_date?.split('T')[0] === targetDate) return;
 
-    // optimistic
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, due_date: targetDate } : t))
     );
@@ -87,18 +86,26 @@ export default function Tasks() {
     try {
       await api.patch(`/tasks/${taskId}/move`, { due_date: targetDate });
     } catch {
-      load(); // rollback
+      load();
     }
   };
 
-  const handleSave = async (payload) => {
+  // `extras` carries static-only fields (meeting_time, repeat)
+  const handleSave = async (payload, extras = {}) => {
     if (modal.task) {
-      await api.put(`/tasks/${modal.task.id}`, payload);
+      const { data } = await api.put(`/tasks/${modal.task.id}`, payload);
+      // merge static fields back onto the returned task
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === modal.task.id ? { ...data, ...extras } : t
+        )
+      );
     } else {
-      await api.post('/tasks', payload);
+      const { data } = await api.post('/tasks', payload);
+      // optimistic insert with static fields merged
+      setTasks((prev) => [...prev, { ...data, ...extras }]);
     }
     setModal({ open: false, date: null, task: null });
-    load();
   };
 
   const handleDelete = async (id) => {

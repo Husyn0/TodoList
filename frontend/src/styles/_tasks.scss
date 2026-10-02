@@ -19,50 +19,42 @@
   }
 
   .week-board {
-    flex: 1;
     display: flex; gap: 16px;
     flex: 1;
     overflow-x: auto;
     padding-bottom: 8px;
-    align-items: flex-start;
+    align-items: flex-start;   // columns size to content
   }
 }
 
 .day-column {
   flex: 1 0 220px;
   min-width: 220px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: flex; flex-direction: column; gap: 8px;
   background: transparent;
   border: none;
-  border-radius: 0;
   padding: 0;
   transition: background .15s;
-  &.over { 
-    background: rgba($primary, .04); 
-  }
+
+  &.over { background: rgba($primary, .04); }
 
   header {
-    display: flex; 
-    justify-content: space-between; 
-    align-items: baseline;
-    padding:0 4px 8px;
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0 4px 8px;
     border-bottom: 1px solid $border;
     span { font-weight: 600; }
     small { color: $muted; }
   }
 
   .tasks-list {
+    display: flex; flex-direction: column; gap: 8px;
     flex: 0 0 auto;
-    display: flex; 
-    flex-direction: column; 
-    gap: 8px;
-    overflow-y: visible;
     min-height: 0;
+    overflow: visible;
   }
 
   .add-task-btn {
+    margin: 0;
     background: transparent;
     border: 1px dashed $border;
     color: $muted;
@@ -70,13 +62,10 @@
     border-radius: 8px;
     font-size: 18px;
     transition: .15s;
-    &:hover { 
-      background: $primary; ; 
-      color: white; 
-      border-color: $primary; 
-    }
+    &:hover { background: $primary; color: white; border-color: $primary; }
   }
 }
+
 
 .task-card {
   background: white;
@@ -92,44 +81,63 @@
   &.dragging { opacity: .3; }
   &.preview { cursor: grabbing; transform: rotate(2deg); box-shadow: $shadow; }
 
-  &.priority-low { border-left-color: $low; }
+  &.priority-low    { border-left-color: $low; }
   &.priority-medium { border-left-color: $medium; }
-  &.priority-high { border-left-color: $high; }
+  &.priority-high   { border-left-color: $high; }
   &.status-done .task-title { text-decoration: line-through; color: $muted; }
 
   .task-title { font-weight: 600; font-size: 14px; }
-  .task-desc { margin: 4px 0 0; font-size: 12px; color: $muted; }
+  .task-desc  { margin: 4px 0 0; font-size: 12px; color: $muted; }
+
+  // small repeat hint (still its own row, under description)
+  .task-repeat {
+    margin-top: 4px;
+    font-size: 11px;
+    color: $muted;
+  }
+
   .task-footer {
-    display: flex; 
-    justify-content: space-between; 
+    display: flex;
     align-items: center;
+    gap: 8px;                 // space between letter | time | actions
     margin-top: 8px;
   }
 
   .priority-letter {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 1;
-      letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    flex: 0 0 auto;
 
-      &.low    { background: rgba($low, .15);    color: $low; }
-      &.medium { background: rgba($medium, .15); color: $medium; }
-      &.high   { background: rgba($high, .15);   color: $high; }
+    &.low    { background: rgba($low, .15);    color: $low; }
+    &.medium { background: rgba($medium, .15); color: $medium; }
+    &.high   { background: rgba($high, .15);   color: $high; }
   }
-  
-  .task-actions button {
-    background: transparent; 
-    border: none;
-    font-size: 13px; 
-    color: $muted; 
-    padding: 2px 4px;
-    &:hover { color: $text; }
+
+  // sits right beside the priority letter, pushes actions to the right
+  .task-meeting-time {
+    font-size: 12px;
+    font-weight: 600;
+    color: $primary;
+    letter-spacing: .3px;
+    flex: 0 0 auto;
+  }
+
+  .task-actions {
+    margin-left: auto;        // pin actions to the right edge
+    display: flex;
+    gap: 2px;
+
+    button {
+      background: transparent; border: none;
+      font-size: 13px; color: $muted; padding: 2px 4px;
+      &:hover { color: $text; }
+    }
   }
 }
 
@@ -161,6 +169,27 @@
   }
   textarea { resize: vertical; min-height: 70px; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  // ---- repeat day picker ----
+  .repeat-days {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .repeat-day {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 20px;
+    border: 1px solid $border;
+    background: white;
+    color: $muted;
+    transition: .15s;
+    &:hover { border-color: $primary; color: $primary; }
+    &.active {
+      background: $primary;
+      border-color: $primary;
+      color: white;
+    }
+  }
+
   .modal-actions {
     display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;
     button {
