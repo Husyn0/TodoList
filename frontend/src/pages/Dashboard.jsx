@@ -24,7 +24,7 @@ const startOfWeek = (date, weekStart = 'monday') => {
 
 const fmt = (d) => d.toISOString().split('T')[0];
 
-// 9 weeks of history (matches ContributionChart)
+// 53 weeks ≈ 12 months
 const CONTRIB_WEEKS = 53;
 
 export default function Dashboard() {
@@ -33,7 +33,7 @@ export default function Dashboard() {
   const [rangeTasks, setRangeTasks] = useState([]);
   const [weekStart] = useState(() => startOfWeek(new Date()));
 
-  // current week → radar chart
+  // current week → radar
   useEffect(() => {
     api
       .get('/tasks', { params: { week_start: fmt(weekStart) } })
@@ -41,14 +41,13 @@ export default function Dashboard() {
       .catch(() => setWeekTasks([]));
   }, [weekStart]);
 
-  // ~2 months back → contribution chart
-    useEffect(() => {
+  // ~1 year back → contribution chart (monthly batched)
+  useEffect(() => {
     let cancelled = false;
 
     const fetchRange = async () => {
       const promises = [];
       const today = new Date();
-      // fetch one request per week_start, one per month for ~13 months
       const monthsBack = 13;
       for (let i = monthsBack - 1; i >= 0; i--) {
         const d = new Date(today);
@@ -72,13 +71,15 @@ export default function Dashboard() {
     return () => { cancelled = true; };
   }, []);
 
-  const days = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(weekStart);
-      d.setDate(d.getDate() + i);
-      return d;
-    });
-  }, [weekStart]);
+  const days = useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(weekStart);
+        d.setDate(d.getDate() + i);
+        return d;
+      }),
+    [weekStart]
+  );
 
   const chartData = useMemo(() => {
     return days.map((d) => {
@@ -108,44 +109,46 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="radar-card">
-        <ResponsiveContainer width="100%" height={420}>
-          <RadarChart data={chartData} outerRadius="75%">
-            <PolarGrid stroke="#e1e5f0" />
-            <PolarAngleAxis dataKey="day" tick={{ fill: '#67708a', fontSize: 13 }} />
-            <PolarRadiusAxis
-              angle={90}
-              domain={[0, 'dataMax + 1']}
-              tick={{ fill: '#a0a8bd', fontSize: 11 }}
-              allowDecimals={false}
-            />
-            <Tooltip
-              contentStyle={{
-                borderRadius: 8,
-                border: '1px solid #e1e5f0',
-                fontSize: 13,
-              }}
-            />
-            <Legend wrapperStyle={{ fontSize: 13 }} />
-            <Radar
-              name="Pending"
-              dataKey="Pending"
-              stroke="#f59e0b"
-              fill="#f59e0b"
-              fillOpacity={0.35}
-            />
-            <Radar
-              name="Done"
-              dataKey="Done"
-              stroke="#10b981"
-              fill="#10b981"
-              fillOpacity={0.35}
-            />
-          </RadarChart>
-        </ResponsiveContainer>
-      </div>
+      <div className="charts-row">
+        <div className="radar-chart">
+          <ResponsiveContainer width="100%" height={340}>
+            <RadarChart data={chartData} outerRadius="75%">
+              <PolarGrid stroke="#e1e5f0" />
+              <PolarAngleAxis dataKey="day" tick={{ fill: '#67708a', fontSize: 12 }} />
+              <PolarRadiusAxis
+                angle={90}
+                domain={[0, 'dataMax + 1']}
+                tick={{ fill: '#a0a8bd', fontSize: 11 }}
+                allowDecimals={false}
+              />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: 8,
+                  border: '1px solid #e1e5f0',
+                  fontSize: 13,
+                }}
+              />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Radar
+                name="Pending"
+                dataKey="Pending"
+                stroke="#f59e0b"
+                fill="#f59e0b"
+                fillOpacity={0.35}
+              />
+              <Radar
+                name="Done"
+                dataKey="Done"
+                stroke="#10b981"
+                fill="#10b981"
+                fillOpacity={0.35}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
 
-      <ContributionChart tasks={rangeTasks} weeks={CONTRIB_WEEKS} />
+        <ContributionChart tasks={rangeTasks} weeks={CONTRIB_WEEKS} />
+      </div>
     </div>
   );
 }

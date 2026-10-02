@@ -86,8 +86,8 @@ export default function ContributionChart({ tasks = [], weeks = 53 }) {
     return '';
   });
 
-  return (
-    <div className="contrib-card">
+    return (
+    <div className="contrib-chart">
       <div className="contrib-head">
         <div>
           <h2>Activity</h2>

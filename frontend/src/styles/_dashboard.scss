@@ -11,27 +11,33 @@
     .muted { color: $muted; font-size: 14px; margin: 0; }
   }
 
-  .radar-card {
-    background: $surface;
-    border: 1px solid $border;
-    border-radius: $radius;
-    box-shadow: $shadow;
-    padding: 20px;
+  // ---- two charts side by side, no card wrappers ----
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: flex-start;
+
+    @media (max-width: 1100px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .radar-chart {
+    // no background / border / padding on purpose
+    min-width: 0;                 // allow flex/grid child to shrink
     display: flex;
     justify-content: center;
+    align-items: center;
   }
 }
 
-// ---- contribution chart ----
-.contrib-card {
-  background: $surface;
-  border: 1px solid $border;
-  border-radius: $radius;
-  box-shadow: $shadow;
-  padding: 20px 22px;
+// ---- contribution chart (no card wrapper) ----
+.contrib-chart {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  min-width: 0;
 
   .contrib-head {
     display: flex;
@@ -51,9 +57,7 @@
     color: $muted;
 
     span:first-child,
-    span:last-child {
-      padding: 0 2px;
-    }
+    span:last-child { padding: 0 2px; }
   }
 
   .contrib-scroll {
@@ -69,12 +73,12 @@
 
   .contrib-day-labels {
     display: grid;
-    grid-template-rows: repeat(7, 10px);
-    gap: 3px;
-    padding-top: 22px;               // align with months row height
+    grid-template-rows: repeat(7, 11px);
+    gap: 2px;
+    padding-top: 18px;
     font-size: 10px;
     color: $muted;
-    line-height: 12px;
+    line-height: 11px;
     text-align: right;
     user-select: none;
   }
@@ -88,9 +92,9 @@
   .contrib-months {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: 12px;         // matches square size
-    gap: 3px;
-    height: 18px;
+    grid-auto-columns: 11px;
+    gap: 2px;
+    height: 16px;
     font-size: 10px;
     color: $muted;
     user-select: none;
@@ -103,7 +107,7 @@
 
   .contrib-cols {
     display: flex;
-    gap: 3px;
+    gap: 2px;
   }
 
   .contrib-col {
@@ -130,7 +134,6 @@
     &.level-empty { background: transparent; }
   }
 
-  // legend uses the same classes, slightly smaller
   .contrib-legend .contrib-square {
     width: 11px;
     height: 11px;
