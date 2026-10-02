@@ -19,38 +19,47 @@
   }
 
   .week-board {
-    display: flex; gap: 12px;
+    flex: 1;
+    display: flex; gap: 16px;
     flex: 1;
     overflow-x: auto;
     padding-bottom: 8px;
+    align-items: flex-start;
   }
 }
 
 .day-column {
   flex: 1 0 220px;
   min-width: 220px;
-  background: $surface;
-  border-radius: $radius;
-  border: 1px solid $border;
-  padding: 12px;
-  display: flex; flex-direction: column; gap: 10px;
-  transition: background .15s, border-color .15s;
-
-  &.over { background: rgba($primary, .06); border-color: $primary; }
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  transition: background .15s;
+  &.over { 
+    background: rgba($primary, .04); 
+  }
 
   header {
-    display: flex; justify-content: space-between; align-items: baseline;
-    padding-bottom: 8px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: baseline;
+    padding:0 4px 8px;
     border-bottom: 1px solid $border;
     span { font-weight: 600; }
     small { color: $muted; }
   }
 
   .tasks-list {
-    flex: 1;
-    display: flex; flex-direction: column; gap: 8px;
-    overflow-y: auto;
-    min-height: 60px;
+    flex: 0 0 auto;
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px;
+    overflow-y: visible;
+    min-height: 0;
   }
 
   .add-task-btn {
@@ -61,7 +70,11 @@
     border-radius: 8px;
     font-size: 18px;
     transition: .15s;
-    &:hover { background: $primary; color: white; border-color: $primary; }
+    &:hover { 
+      background: $primary; ; 
+      color: white; 
+      border-color: $primary; 
+    }
   }
 }
 
