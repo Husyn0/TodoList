@@ -9,8 +9,8 @@ import {
   Legend,
   Tooltip,
 } from 'recharts';
-import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { tasksApi } from '../api';
 import ContributionChart from '../components/ContributionChart';
 
 const startOfWeek = (date, weekStart = 'monday') => {
@@ -24,7 +24,6 @@ const startOfWeek = (date, weekStart = 'monday') => {
 
 const fmt = (d) => d.toISOString().split('T')[0];
 
-// 53 weeks ≈ 12 months
 const CONTRIB_WEEKS = 53;
 
 export default function Dashboard() {
@@ -35,40 +34,21 @@ export default function Dashboard() {
 
   // current week → radar
   useEffect(() => {
-    api
-      .get('/tasks', { params: { week_start: fmt(weekStart) } })
-      .then((res) => setWeekTasks(res.data))
+    tasksApi
+      .getTasksForWeek(fmt(weekStart))
+      .then(setWeekTasks)
       .catch(() => setWeekTasks([]));
   }, [weekStart]);
 
-  // ~1 year back → contribution chart (monthly batched)
+  // ~1 year back → contribution chart
   useEffect(() => {
     let cancelled = false;
-
-    const fetchRange = async () => {
-      const promises = [];
-      const today = new Date();
-      const monthsBack = 13;
-      for (let i = monthsBack - 1; i >= 0; i--) {
-        const d = new Date(today);
-        d.setMonth(d.getMonth() - i);
-        const ws = startOfWeek(d);
-        promises.push(
-          api
-            .get('/tasks', { params: { week_start: fmt(ws) } })
-            .then((r) => r.data)
-            .catch(() => [])
-        );
-      }
-      const results = await Promise.all(promises);
-      if (cancelled) return;
-      const byId = new Map();
-      for (const list of results) for (const t of list) byId.set(t.id, t);
-      setRangeTasks(Array.from(byId.values()));
+    tasksApi.getTasksRange(13).then((tasks) => {
+      if (!cancelled) setRangeTasks(tasks);
+    });
+    return () => {
+      cancelled = true;
     };
-
-    fetchRange();
-    return () => { cancelled = true; };
   }, []);
 
   const days = useMemo(
@@ -84,7 +64,9 @@ export default function Dashboard() {
   const chartData = useMemo(() => {
     return days.map((d) => {
       const key = fmt(d);
-      const dayTasks = weekTasks.filter((t) => t.due_date?.split('T')[0] === key);
+      const dayTasks = weekTasks.filter(
+        (t) => t.due_date?.split('T')[0] === key
+      );
       const done = dayTasks.filter((t) => t.status === 'done').length;
       const pending = dayTasks.length - done;
       return {
@@ -114,7 +96,10 @@ export default function Dashboard() {
           <ResponsiveContainer width="100%" height={340}>
             <RadarChart data={chartData} outerRadius="75%">
               <PolarGrid stroke="#e1e5f0" />
-              <PolarAngleAxis dataKey="day" tick={{ fill: '#67708a', fontSize: 12 }} />
+              <PolarAngleAxis
+                dataKey="day"
+                tick={{ fill: '#67708a', fontSize: 12 }}
+              />
               <PolarRadiusAxis
                 angle={90}
                 domain={[0, 'dataMax + 1']}

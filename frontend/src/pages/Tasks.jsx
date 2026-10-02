@@ -1,11 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
-  DndContext, DragOverlay, PointerSensor, useSensor, useSensors,
-  closestCorners, useDroppable,
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCorners,
+  useDroppable,
 } from '@dnd-kit/core';
-import api from '../api/client';
 import TaskCard from '../components/TaskCard';
 import AddTaskModal from '../components/AddTaskModal';
+import { tasksApi, tracksApi } from '../api';
 import {
   occursOnDate,
   isPastDate,
@@ -66,7 +71,6 @@ function DayColumn({ date, tasks, tracks, onAdd, onEdit, onDelete, onToggleDone 
 export default function Tasks() {
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date()));
   const [tasks, setTasks] = useState([]);
-  // tracks: { "taskId__YYYY-MM-DD": { task_id, date, status, completed_at, meeting_time? } }
   const [tracks, setTracks] = useState({});
   const [activeTask, setActiveTask] = useState(null);
   const [modal, setModal] = useState({ open: false, date: null, task: null });
@@ -78,13 +82,13 @@ export default function Tasks() {
   });
 
   const load = useCallback(() => {
-    api.get('/tasks', { params: { week_start: fmt(weekStart) } })
-      .then((res) => setTasks(res.data));
-    // When the backend exists, this is where you'd also fetch tracks:
-    // api.get('/tracks', { params: { from, to } }).then(...)
+    tasksApi.getTasksForWeek(fmt(weekStart)).then(setTasks);
+    tracksApi.getTracks().then(setTracks);
   }, [weekStart]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -95,13 +99,9 @@ export default function Tasks() {
       .filter((t) => occursOnDate(t, date))
       .sort((a, b) => a.position - b.position);
 
-  // --- track store (swap internals for API calls later) ---
-  const upsertTrack = (taskId, dateKey, patch) => {
-    setTracks((prev) => {
-      const k = trackKey(taskId, dateKey);
-      const current = prev[k] || { task_id: taskId, date: dateKey, status: 'pending' };
-      return { ...prev, [k]: { ...current, ...patch } };
-    });
+  const upsertTrackLocal = async (taskId, dateKey, patch) => {
+    const updated = await tracksApi.upsertTrack(taskId, dateKey, patch);
+    setTracks((prev) => ({ ...prev, [trackKey(taskId, dateKey)]: updated }));
   };
 
   const handleDragStart = (e) => {
@@ -125,25 +125,18 @@ export default function Tasks() {
     );
 
     try {
-      await api.patch(`/tasks/${taskId}/move`, { due_date: targetDate });
+      await tasksApi.moveTask(taskId, targetDate);
     } catch {
       load();
     }
   };
 
-  // --- per-day toggle, writes to track, not the task ---
   const handleToggleDone = async (task, dateKey, checked) => {
     const nextStatus = checked ? 'done' : 'pending';
-
-    // optimistic track update
-    upsertTrack(task.id, dateKey, {
+    await upsertTrackLocal(task.id, dateKey, {
       status: nextStatus,
       completed_at: checked ? new Date().toISOString() : null,
     });
-
-    // When the backend exists:
-    // await api.put(`/tracks/${task.id}/${dateKey}`, { status: nextStatus });
-    // For now, nothing is sent to the server.
   };
 
   const handleSave = async (payload, extras = {}) => {
@@ -153,14 +146,14 @@ export default function Tasks() {
     }
 
     if (modal.task) {
-      const { data } = await api.put(`/tasks/${modal.task.id}`, payload);
+      const data = await tasksApi.updateTask(modal.task.id, payload);
       setTasks((prev) =>
         prev.map((t) =>
           t.id === modal.task.id ? { ...data, ...extras } : t
         )
       );
     } else {
-      const { data } = await api.post('/tasks', payload);
+      const data = await tasksApi.createTask(payload);
       setTasks((prev) => [...prev, { ...data, ...extras }]);
     }
     setModal({ open: false, date: null, task: null });
@@ -168,9 +161,9 @@ export default function Tasks() {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this task?')) return;
-    await api.delete(`/tasks/${id}`);
+    await tasksApi.deleteTask(id);
     setTasks((prev) => prev.filter((t) => t.id !== id));
-    // also drop any local tracks for this task
+    await tracksApi.deleteTracksForTask(id);
     setTracks((prev) => {
       const next = {};
       for (const [k, v] of Object.entries(prev)) {
@@ -186,13 +179,10 @@ export default function Tasks() {
     setWeekStart(d);
   };
 
-  // --- "done today" counter for the header ---
   const today = todayKey();
-  const doneToday = tasks.filter(
-    (t) => occursOnDate(t, new Date(today))
-  ).filter(
-    (t) => statusForOccurrence(tracks, t, today) === 'done'
-  ).length;
+  const doneToday = tasks
+    .filter((t) => occursOnDate(t, new Date(today)))
+    .filter((t) => statusForOccurrence(tracks, t, today) === 'done').length;
 
   return (
     <div className="tasks-page">
@@ -200,7 +190,9 @@ export default function Tasks() {
         <h1>Weekly Tasks</h1>
         <div className="week-nav">
           <button onClick={() => changeWeek(-1)}>←</button>
-          <span>{weekStart.toLocaleDateString()} – {days[6].toLocaleDateString()}</span>
+          <span>
+            {weekStart.toLocaleDateString()} – {days[6].toLocaleDateString()}
+          </span>
           <button onClick={() => changeWeek(1)}>→</button>
           <span className="done-today">✅ {doneToday} done today</span>
         </div>

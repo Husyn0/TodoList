@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import api from '../api/client';
+import { authApi } from '../api';
 
 const AuthContext = createContext();
 
@@ -11,34 +11,40 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (!token) return setLoading(false);
 
-    api.get('/me')
-      .then((res) => setUser(res.data))
+    authApi
+      .getMe()
+      .then((data) => setUser(data))
       .catch(() => localStorage.removeItem('token'))
       .finally(() => setLoading(false));
   }, []);
 
   const login = async (email, password) => {
-    const { data } = await api.post('/login', { email, password });
+    const data = await authApi.login(email, password);
     localStorage.setItem('token', data.token);
     setUser(data.user);
   };
 
   const register = async (name, email, password, password_confirmation) => {
-    const { data } = await api.post('/register', {
-      name, email, password, password_confirmation,
+    const data = await authApi.register({
+      name,
+      email,
+      password,
+      password_confirmation,
     });
     localStorage.setItem('token', data.token);
     setUser(data.user);
   };
 
   const logout = async () => {
-    try { await api.post('/logout'); } catch {}
+    await authApi.logout();
     localStorage.removeItem('token');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, setUser }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, register, logout, setUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
