@@ -1,5 +1,7 @@
 import { useDraggable } from '@dnd-kit/core';
 
+const PRIORITY_LETTER = { low: 'L', medium: 'M', high: 'H' };
+
 export default function TaskCard({ task, onEdit, onDelete, preview }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
@@ -21,8 +23,9 @@ export default function TaskCard({ task, onEdit, onDelete, preview }) {
     >
       <div className="task-title">{task.title}</div>
       {task.description && <p className="task-desc">{task.description}</p>}
+
       <div className="task-footer">
-        <span className={`badge ${task.priority}`}>{task.priority}</span>
+        <span className={`priority-letter ${task.priority}`}>{PRIORITY_LETTER[task.priority]?? '•'}</span>
         {!preview && (
           <div className="task-actions">
             <button onClick={(e) => { e.stopPropagation(); onEdit?.(task); }}>✎</button>
