@@ -2,6 +2,7 @@
 @use 'auth';
 @use 'tasks';
 @use 'dashboard';
+@use 'settings';
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
@@ -58,8 +59,8 @@ button { cursor: pointer; font: inherit; }
 }
 
 .toast {
-  background: $primary; color: white;
-  padding: 10px 14px; border-radius: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
   margin-bottom: 16px;
   display: inline-block;
 }
