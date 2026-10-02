@@ -1,0 +1,94 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 20, 40, .5);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.modal {
+  background: white;
+  padding: 28px;
+  border-radius: $radius;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .25);
+
+  h2 { margin: 0; }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+    color: $muted;
+    font-weight: 500;
+  }
+
+  input,
+  textarea,
+  select { @include input-plain; }
+
+  textarea {
+    resize: vertical;
+    min-height: 70px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .repeat-days {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .repeat-day {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: $radius-pill;
+    border: 1px solid $border;
+    background: white;
+    color: $muted;
+    transition: $transition;
+
+    &:hover {
+      border-color: $primary;
+      color: $primary;
+    }
+
+    &.active {
+      background: $primary;
+      border-color: $primary;
+      color: white;
+    }
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 6px;
+
+    button { @include btn-ghost; }
+    button[type='submit'] { @include btn-primary; }
+  }
+
+  .error {
+    color: $danger;
+    font-size: 13px;
+    margin: 0;
+    font-weight: 500;
+  }
+}

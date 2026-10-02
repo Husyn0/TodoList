@@ -1,22 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
-import {
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  closestCorners,
-  useDroppable,
-} from '@dnd-kit/core';
-import TaskCard from '../components/TaskCard';
+import { PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import AddTaskModal from '../components/AddTaskModal';
+import TasksHeader from '../components/tasks/TasksHeader';
+import WeekBoard from '../components/tasks/WeekBoard';
 import { tasksApi, tracksApi } from '../api';
 import {
   occursOnDate,
   isPastDate,
   trackKey,
   statusForOccurrence,
-  meetingTimeForOccurrence,
   todayKey,
 } from '../constants/task';
 
@@ -31,43 +23,6 @@ const startOfWeek = (date, weekStart = 'monday') => {
 
 const fmt = (d) => d.toISOString().split('T')[0];
 
-function DayColumn({ date, tasks, tracks, onAdd, onEdit, onDelete, onToggleDone }) {
-  const key = fmt(date);
-  const { setNodeRef, isOver } = useDroppable({ id: key });
-  const isPast = isPastDate(key);
-
-  return (
-    <div ref={setNodeRef} className={`day-column ${isOver ? 'over' : ''}`}>
-      <header>
-        <span>{date.toLocaleDateString(undefined, { weekday: 'short' })}</span>
-        <small>{date.getDate()}</small>
-      </header>
-      <div className="tasks-list">
-        {tasks.map((t) => (
-          <TaskCard
-            key={`${t.id}-${key}`}
-            task={t}
-            occurrenceDate={key}
-            occurrenceStatus={statusForOccurrence(tracks, t, key)}
-            occurrenceMeetingTime={meetingTimeForOccurrence(tracks, t, key)}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onToggleDone={onToggleDone}
-          />
-        ))}
-      </div>
-      <button
-        className="add-task-btn"
-        disabled={isPast}
-        title={isPast ? 'Can’t add tasks to a past day' : 'Add task'}
-        onClick={() => !isPast && onAdd(key)}
-      >
-        +
-      </button>
-    </div>
-  );
-}
-
 export default function Tasks() {
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date()));
   const [tasks, setTasks] = useState([]);
@@ -81,6 +36,10 @@ export default function Tasks() {
     return d;
   });
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
   const load = useCallback(() => {
     tasksApi.getTasksForWeek(fmt(weekStart)).then(setTasks);
     tracksApi.getTracks().then(setTracks);
@@ -89,10 +48,6 @@ export default function Tasks() {
   useEffect(() => {
     load();
   }, [load]);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
-  );
 
   const tasksByDay = (date) =>
     tasks
@@ -148,9 +103,7 @@ export default function Tasks() {
     if (modal.task) {
       const data = await tasksApi.updateTask(modal.task.id, payload);
       setTasks((prev) =>
-        prev.map((t) =>
-          t.id === modal.task.id ? { ...data, ...extras } : t
-        )
+        prev.map((t) => (t.id === modal.task.id ? { ...data, ...extras } : t))
       );
     } else {
       const data = await tasksApi.createTask(payload);
@@ -186,43 +139,26 @@ export default function Tasks() {
 
   return (
     <div className="tasks-page">
-      <header className="tasks-header">
-        <h1>Weekly Tasks</h1>
-        <div className="week-nav">
-          <button onClick={() => changeWeek(-1)}>←</button>
-          <span>
-            {weekStart.toLocaleDateString()} – {days[6].toLocaleDateString()}
-          </span>
-          <button onClick={() => changeWeek(1)}>→</button>
-          <span className="done-today">✅ {doneToday} done today</span>
-        </div>
-      </header>
+      <TasksHeader
+        weekStart={weekStart}
+        weekEnd={days[6]}
+        doneToday={doneToday}
+        onChangeWeek={changeWeek}
+      />
 
-      <DndContext
+      <WeekBoard
+        days={days}
         sensors={sensors}
-        collisionDetection={closestCorners}
+        activeTask={activeTask}
+        tasksByDay={tasksByDay}
+        tracks={tracks}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-      >
-        <div className="week-board">
-          {days.map((d) => (
-            <DayColumn
-              key={fmt(d)}
-              date={d}
-              tasks={tasksByDay(d)}
-              tracks={tracks}
-              onAdd={(date) => setModal({ open: true, date, task: null })}
-              onEdit={(task) => setModal({ open: true, date: null, task })}
-              onDelete={handleDelete}
-              onToggleDone={handleToggleDone}
-            />
-          ))}
-        </div>
-
-        <DragOverlay>
-          {activeTask ? <TaskCard task={activeTask} preview /> : null}
-        </DragOverlay>
-      </DndContext>
+        onAdd={(date) => setModal({ open: true, date, task: null })}
+        onEdit={(task) => setModal({ open: true, date: null, task })}
+        onDelete={handleDelete}
+        onToggleDone={handleToggleDone}
+      />
 
       {modal.open && (
         <AddTaskModal

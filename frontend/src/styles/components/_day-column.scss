@@ -1,0 +1,68 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.day-column {
+  flex: 1 0 220px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  transition: background $transition;
+
+  &.over { background: rgba($primary, .04); }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0 4px 8px;
+    border-bottom: 1px solid $border;
+
+    span { font-weight: 600; }
+    small { color: $muted; }
+  }
+
+  .tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 0 0 auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .add-task-btn {
+    margin: 0;
+    background: transparent;
+    border: 1px dashed $border;
+    color: $muted;
+    padding: 8px;
+    border-radius: $radius-sm;
+    font-size: 18px;
+    transition: $transition;
+
+    &:hover {
+      background: $primary;
+      color: white;
+      border-color: $primary;
+    }
+
+    &:disabled,
+    &[disabled] {
+      opacity: .35;
+      cursor: not-allowed;
+      background: transparent;
+      color: $muted;
+      border-color: $border;
+
+      &:hover {
+        background: transparent;
+        color: $muted;
+        border-color: $border;
+      }
+    }
+  }
+}

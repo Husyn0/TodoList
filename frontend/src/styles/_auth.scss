@@ -1,4 +1,5 @@
 @use 'variables' as *;
+@use 'mixins' as *;
 
 .auth-page {
   min-height: 100vh;
@@ -9,28 +10,38 @@
 }
 
 .auth-card {
-  background: $surface;
-  padding: 40px;
+  @include card(40px);
   width: 100%;
   max-width: 420px;
-  border-radius: $radius;
-  box-shadow: $shadow;
-  display: flex; flex-direction: column; gap: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 
   h1 { margin: 0 0 8px; }
+
   input {
+    @include input-plain;
     padding: 12px 14px;
-    border: 1px solid $border;
-    border-radius: 8px;
-    font: inherit;
-    &:focus { outline: 2px solid $primary; border-color: $primary; }
   }
+
   button {
-    background: $primary; color: white; border: none;
-    padding: 12px; border-radius: 8px; font-weight: 600;
-    &:hover { background: $primary-dark; }
+    @include btn-primary;
+    padding: 12px;
+    border-radius: $radius-sm;
   }
-  p { text-align: center; color: $muted; font-size: 14px; margin: 8px 0 0; }
+
+  p {
+    text-align: center;
+    color: $muted;
+    font-size: 14px;
+    margin: 8px 0 0;
+  }
+
   a { color: $primary; text-decoration: none; }
-  .error { color: $danger; font-size: 14px; margin: 0; }
+
+  .error {
+    color: $danger;
+    font-size: 14px;
+    margin: 0;
+  }
 }

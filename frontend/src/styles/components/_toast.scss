@@ -1,0 +1,23 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+@use 'sass:color';
+
+.toast {
+  padding: 10px 16px;
+  border-radius: $radius-sm;
+  font-size: 14px;
+  font-weight: 500;
+  width: fit-content;
+
+  &.success {
+    background: rgba($low, .12);
+    color: color.adjust($low, $lightness: -10%);
+    border: 1px solid rgba($low, .3);
+  }
+
+  &.error {
+    background: rgba($danger, .1);
+    color: $danger;
+    border: 1px solid rgba($danger, .3);
+  }
+}
