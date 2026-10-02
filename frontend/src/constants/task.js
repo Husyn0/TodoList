@@ -79,3 +79,21 @@ export const isPastDate = (key) => {
   if (!key) return false;
   return key < todayKey();
 };
+// ---- track helpers (static until backend exists) ----
+
+export const trackKey = (taskId, dateKey) => `${taskId}__${dateKey}`;
+
+// Deterministic fallback status when no track exists yet.
+// Non-repeated tasks fall back to their task.status;
+// repeated tasks default to 'pending' per day.
+export const statusForOccurrence = (tracks, task, dateKey) => {
+  const k = trackKey(task.id, dateKey);
+  if (tracks[k]) return tracks[k].status;
+  const isRepeated = task.repeat && task.repeat.preset !== 'none';
+  return isRepeated ? 'pending' : (task.status || 'pending');
+};
+
+export const meetingTimeForOccurrence = (tracks, task, dateKey) => {
+  const k = trackKey(task.id, dateKey);
+  return tracks[k]?.meeting_time ?? task.meeting_time ?? '';
+};

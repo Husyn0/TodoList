@@ -4,6 +4,8 @@ import { PRIORITY_LETTER, describeRepeat } from '../constants/task';
 export default function TaskCard({
   task,
   occurrenceDate,
+  occurrenceStatus,
+  occurrenceMeetingTime,
   onEdit,
   onDelete,
   onToggleDone,
@@ -11,9 +13,12 @@ export default function TaskCard({
 }) {
   const isRepeated = task.repeat && task.repeat.preset !== 'none';
   const repeatLabel = describeRepeat(task.repeat);
-  const isDone = task.status === 'done';
 
-  // Only non-repeated tasks are draggable (until backend supports per-occurrence move)
+  // prefer the per-occurrence values, fall back to the task's own
+  const status = occurrenceStatus ?? task.status ?? 'pending';
+  const meetingTime = occurrenceMeetingTime ?? task.meeting_time ?? '';
+  const isDone = status === 'done';
+
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
     disabled: isRepeated || preview,
@@ -27,13 +32,12 @@ export default function TaskCard({
     <div
       ref={preview ? undefined : setNodeRef}
       style={style}
-      className={`task-card priority-${task.priority} status-${task.status} ${
+      className={`task-card priority-${task.priority} status-${status} ${
         isDragging ? 'dragging' : ''
       } ${preview ? 'preview' : ''} ${isRepeated ? 'repeated' : ''}`}
       {...(preview ? {} : listeners)}
       {...(preview ? {} : attributes)}
     >
-      {/* Header row: checkbox + title */}
       <div className="task-head">
         <label
           className="task-check"
@@ -44,7 +48,9 @@ export default function TaskCard({
             type="checkbox"
             checked={isDone}
             disabled={preview}
-            onChange={(e) => onToggleDone?.(task, e.target.checked)}
+            onChange={(e) =>
+              onToggleDone?.(task, occurrenceDate, e.target.checked)
+            }
           />
           <span className="checkmark" />
         </label>
@@ -66,8 +72,8 @@ export default function TaskCard({
           {PRIORITY_LETTER[task.priority] ?? '•'}
         </span>
 
-        {task.meeting_time && (
-          <span className="task-meeting-time">🕒 {task.meeting_time}</span>
+        {meetingTime && (
+          <span className="task-meeting-time">🕒 {meetingTime}</span>
         )}
 
         {!preview && (

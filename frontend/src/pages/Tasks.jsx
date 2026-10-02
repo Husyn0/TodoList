@@ -6,7 +6,14 @@ import {
 import api from '../api/client';
 import TaskCard from '../components/TaskCard';
 import AddTaskModal from '../components/AddTaskModal';
-import { occursOnDate, isPastDate } from '../constants/task';
+import {
+  occursOnDate,
+  isPastDate,
+  trackKey,
+  statusForOccurrence,
+  meetingTimeForOccurrence,
+  todayKey,
+} from '../constants/task';
 
 const startOfWeek = (date, weekStart = 'monday') => {
   const d = new Date(date);
@@ -19,7 +26,7 @@ const startOfWeek = (date, weekStart = 'monday') => {
 
 const fmt = (d) => d.toISOString().split('T')[0];
 
-function DayColumn({ date, tasks, onAdd, onEdit, onDelete, onToggleDone }) {
+function DayColumn({ date, tasks, tracks, onAdd, onEdit, onDelete, onToggleDone }) {
   const key = fmt(date);
   const { setNodeRef, isOver } = useDroppable({ id: key });
   const isPast = isPastDate(key);
@@ -36,6 +43,8 @@ function DayColumn({ date, tasks, onAdd, onEdit, onDelete, onToggleDone }) {
             key={`${t.id}-${key}`}
             task={t}
             occurrenceDate={key}
+            occurrenceStatus={statusForOccurrence(tracks, t, key)}
+            occurrenceMeetingTime={meetingTimeForOccurrence(tracks, t, key)}
             onEdit={onEdit}
             onDelete={onDelete}
             onToggleDone={onToggleDone}
@@ -57,6 +66,8 @@ function DayColumn({ date, tasks, onAdd, onEdit, onDelete, onToggleDone }) {
 export default function Tasks() {
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date()));
   const [tasks, setTasks] = useState([]);
+  // tracks: { "taskId__YYYY-MM-DD": { task_id, date, status, completed_at, meeting_time? } }
+  const [tracks, setTracks] = useState({});
   const [activeTask, setActiveTask] = useState(null);
   const [modal, setModal] = useState({ open: false, date: null, task: null });
 
@@ -69,6 +80,8 @@ export default function Tasks() {
   const load = useCallback(() => {
     api.get('/tasks', { params: { week_start: fmt(weekStart) } })
       .then((res) => setTasks(res.data));
+    // When the backend exists, this is where you'd also fetch tracks:
+    // api.get('/tracks', { params: { from, to } }).then(...)
   }, [weekStart]);
 
   useEffect(() => { load(); }, [load]);
@@ -81,6 +94,15 @@ export default function Tasks() {
     tasks
       .filter((t) => occursOnDate(t, date))
       .sort((a, b) => a.position - b.position);
+
+  // --- track store (swap internals for API calls later) ---
+  const upsertTrack = (taskId, dateKey, patch) => {
+    setTracks((prev) => {
+      const k = trackKey(taskId, dateKey);
+      const current = prev[k] || { task_id: taskId, date: dateKey, status: 'pending' };
+      return { ...prev, [k]: { ...current, ...patch } };
+    });
+  };
 
   const handleDragStart = (e) => {
     setActiveTask(tasks.find((t) => t.id === e.active.id));
@@ -98,8 +120,6 @@ export default function Tasks() {
     if (task.repeat && task.repeat.preset !== 'none') return;
     if (task.due_date?.split('T')[0] === targetDate) return;
 
-    // NOTE: dragging into the past is intentionally still allowed.
-
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, due_date: targetDate } : t))
     );
@@ -111,20 +131,22 @@ export default function Tasks() {
     }
   };
 
-  const handleToggleDone = async (task, checked) => {
+  // --- per-day toggle, writes to track, not the task ---
+  const handleToggleDone = async (task, dateKey, checked) => {
     const nextStatus = checked ? 'done' : 'pending';
-    setTasks((prev) =>
-      prev.map((t) => (t.id === task.id ? { ...t, status: nextStatus } : t))
-    );
-    try {
-      await api.put(`/tasks/${task.id}`, { status: nextStatus });
-    } catch {
-      load();
-    }
+
+    // optimistic track update
+    upsertTrack(task.id, dateKey, {
+      status: nextStatus,
+      completed_at: checked ? new Date().toISOString() : null,
+    });
+
+    // When the backend exists:
+    // await api.put(`/tracks/${task.id}/${dateKey}`, { status: nextStatus });
+    // For now, nothing is sent to the server.
   };
 
   const handleSave = async (payload, extras = {}) => {
-    // Final safety net — never create/move into the past.
     if (isPastDate(payload.due_date)) {
       alert('You can’t schedule a task in the past.');
       return;
@@ -133,7 +155,9 @@ export default function Tasks() {
     if (modal.task) {
       const { data } = await api.put(`/tasks/${modal.task.id}`, payload);
       setTasks((prev) =>
-        prev.map((t) => (t.id === modal.task.id ? { ...data, ...extras } : t))
+        prev.map((t) =>
+          t.id === modal.task.id ? { ...data, ...extras } : t
+        )
       );
     } else {
       const { data } = await api.post('/tasks', payload);
@@ -146,6 +170,14 @@ export default function Tasks() {
     if (!confirm('Delete this task?')) return;
     await api.delete(`/tasks/${id}`);
     setTasks((prev) => prev.filter((t) => t.id !== id));
+    // also drop any local tracks for this task
+    setTracks((prev) => {
+      const next = {};
+      for (const [k, v] of Object.entries(prev)) {
+        if (v.task_id !== id) next[k] = v;
+      }
+      return next;
+    });
   };
 
   const changeWeek = (offset) => {
@@ -153,6 +185,14 @@ export default function Tasks() {
     d.setDate(d.getDate() + offset * 7);
     setWeekStart(d);
   };
+
+  // --- "done today" counter for the header ---
+  const today = todayKey();
+  const doneToday = tasks.filter(
+    (t) => occursOnDate(t, new Date(today))
+  ).filter(
+    (t) => statusForOccurrence(tracks, t, today) === 'done'
+  ).length;
 
   return (
     <div className="tasks-page">
@@ -162,6 +202,7 @@ export default function Tasks() {
           <button onClick={() => changeWeek(-1)}>←</button>
           <span>{weekStart.toLocaleDateString()} – {days[6].toLocaleDateString()}</span>
           <button onClick={() => changeWeek(1)}>→</button>
+          <span className="done-today">✅ {doneToday} done today</span>
         </div>
       </header>
 
@@ -177,6 +218,7 @@ export default function Tasks() {
               key={fmt(d)}
               date={d}
               tasks={tasksByDay(d)}
+              tracks={tracks}
               onAdd={(date) => setModal({ open: true, date, task: null })}
               onEdit={(task) => setModal({ open: true, date: null, task })}
               onDelete={handleDelete}

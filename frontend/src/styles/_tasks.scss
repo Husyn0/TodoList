@@ -15,6 +15,15 @@
         &:hover { background: $bg; }
       }
       span { font-size: 14px; color: $muted; }
+        .done-today {
+          margin-left: 12px;
+          font-size: 12px;
+          font-weight: 600;
+          color: $low;
+          background: rgba($low, .1);
+          padding: 4px 10px;
+          border-radius: 20px;
+        }
     }
   }
 
