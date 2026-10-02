@@ -11,11 +11,11 @@ import {
 } from 'recharts';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import ContributionChart from '../components/ContributionChart';
 
-// ---------- date helpers ----------
 const startOfWeek = (date, weekStart = 'monday') => {
   const d = new Date(date);
-  const day = d.getDay(); // 0 Sun … 6 Sat
+  const day = d.getDay();
   const diff = weekStart === 'monday' ? (day === 0 ? -6 : 1 - day) : -day;
   d.setDate(d.getDate() + diff);
   d.setHours(0, 0, 0, 0);
@@ -24,19 +24,54 @@ const startOfWeek = (date, weekStart = 'monday') => {
 
 const fmt = (d) => d.toISOString().split('T')[0];
 
+// 9 weeks of history (matches ContributionChart)
+const CONTRIB_WEEKS = 53;
+
 export default function Dashboard() {
   const { user } = useAuth();
-  const [tasks, setTasks] = useState([]);
+  const [weekTasks, setWeekTasks] = useState([]);
+  const [rangeTasks, setRangeTasks] = useState([]);
   const [weekStart] = useState(() => startOfWeek(new Date()));
 
+  // current week → radar chart
   useEffect(() => {
     api
       .get('/tasks', { params: { week_start: fmt(weekStart) } })
-      .then((res) => setTasks(res.data))
-      .catch(() => setTasks([]));
+      .then((res) => setWeekTasks(res.data))
+      .catch(() => setWeekTasks([]));
   }, [weekStart]);
 
-  // Build the 7 days of the current week
+  // ~2 months back → contribution chart
+    useEffect(() => {
+    let cancelled = false;
+
+    const fetchRange = async () => {
+      const promises = [];
+      const today = new Date();
+      // fetch one request per week_start, one per month for ~13 months
+      const monthsBack = 13;
+      for (let i = monthsBack - 1; i >= 0; i--) {
+        const d = new Date(today);
+        d.setMonth(d.getMonth() - i);
+        const ws = startOfWeek(d);
+        promises.push(
+          api
+            .get('/tasks', { params: { week_start: fmt(ws) } })
+            .then((r) => r.data)
+            .catch(() => [])
+        );
+      }
+      const results = await Promise.all(promises);
+      if (cancelled) return;
+      const byId = new Map();
+      for (const list of results) for (const t of list) byId.set(t.id, t);
+      setRangeTasks(Array.from(byId.values()));
+    };
+
+    fetchRange();
+    return () => { cancelled = true; };
+  }, []);
+
   const days = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(weekStart);
@@ -45,11 +80,10 @@ export default function Dashboard() {
     });
   }, [weekStart]);
 
-  // Build radar data: one row per day, with pending/done counts
   const chartData = useMemo(() => {
     return days.map((d) => {
       const key = fmt(d);
-      const dayTasks = tasks.filter((t) => t.due_date?.split('T')[0] === key);
+      const dayTasks = weekTasks.filter((t) => t.due_date?.split('T')[0] === key);
       const done = dayTasks.filter((t) => t.status === 'done').length;
       const pending = dayTasks.length - done;
       return {
@@ -59,10 +93,10 @@ export default function Dashboard() {
         total: dayTasks.length,
       };
     });
-  }, [days, tasks]);
+  }, [days, weekTasks]);
 
-  const total = tasks.length;
-  const done = tasks.filter((t) => t.status === 'done').length;
+  const total = weekTasks.length;
+  const done = weekTasks.filter((t) => t.status === 'done').length;
 
   return (
     <div className="dashboard-page">
@@ -110,6 +144,8 @@ export default function Dashboard() {
           </RadarChart>
         </ResponsiveContainer>
       </div>
+
+      <ContributionChart tasks={rangeTasks} weeks={CONTRIB_WEEKS} />
     </div>
   );
 }
