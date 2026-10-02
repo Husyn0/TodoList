@@ -63,6 +63,21 @@
     font-size: 18px;
     transition: .15s;
     &:hover { background: $primary; color: white; border-color: $primary; }
+    
+    &:disabled,
+    &[disabled] {
+      opacity: .35;
+      cursor: not-allowed;
+      background: transparent;
+      color: $muted;
+      border-color: $border;
+
+      &:hover {
+        background: transparent;
+        color: $muted;
+        border-color: $border;
+      }
+    }
   }
 }
 
@@ -296,5 +311,11 @@
       &[type="submit"] { background: $primary; color: white; border-color: $primary; }
       &[type="submit"]:hover { background: $primary-dark; }
     }
+  }
+  .error {
+    color: $danger;
+    font-size: 13px;
+    margin: 0;
+    font-weight: 500;
   }
 }

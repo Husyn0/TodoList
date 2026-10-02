@@ -67,3 +67,15 @@ export const occursOnDate = (task, date) => {
 
   return key === dueKey;
 };
+
+// ---- date helpers ----
+export const todayKey = () => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString().split('T')[0];
+};
+
+export const isPastDate = (key) => {
+  if (!key) return false;
+  return key < todayKey();
+};

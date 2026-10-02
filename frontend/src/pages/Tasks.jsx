@@ -6,7 +6,7 @@ import {
 import api from '../api/client';
 import TaskCard from '../components/TaskCard';
 import AddTaskModal from '../components/AddTaskModal';
-import { occursOnDate } from '../constants/task';
+import { occursOnDate, isPastDate } from '../constants/task';
 
 const startOfWeek = (date, weekStart = 'monday') => {
   const d = new Date(date);
@@ -22,6 +22,7 @@ const fmt = (d) => d.toISOString().split('T')[0];
 function DayColumn({ date, tasks, onAdd, onEdit, onDelete, onToggleDone }) {
   const key = fmt(date);
   const { setNodeRef, isOver } = useDroppable({ id: key });
+  const isPast = isPastDate(key);
 
   return (
     <div ref={setNodeRef} className={`day-column ${isOver ? 'over' : ''}`}>
@@ -41,7 +42,14 @@ function DayColumn({ date, tasks, onAdd, onEdit, onDelete, onToggleDone }) {
           />
         ))}
       </div>
-      <button className="add-task-btn" onClick={() => onAdd(key)}>+</button>
+      <button
+        className="add-task-btn"
+        disabled={isPast}
+        title={isPast ? 'Can’t add tasks to a past day' : 'Add task'}
+        onClick={() => !isPast && onAdd(key)}
+      >
+        +
+      </button>
     </div>
   );
 }
@@ -90,6 +98,8 @@ export default function Tasks() {
     if (task.repeat && task.repeat.preset !== 'none') return;
     if (task.due_date?.split('T')[0] === targetDate) return;
 
+    // NOTE: dragging into the past is intentionally still allowed.
+
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, due_date: targetDate } : t))
     );
@@ -101,29 +111,29 @@ export default function Tasks() {
     }
   };
 
-  // ---- NEW: toggle done/pending ----
   const handleToggleDone = async (task, checked) => {
     const nextStatus = checked ? 'done' : 'pending';
-
-    // optimistic update
     setTasks((prev) =>
       prev.map((t) => (t.id === task.id ? { ...t, status: nextStatus } : t))
     );
-
     try {
       await api.put(`/tasks/${task.id}`, { status: nextStatus });
     } catch {
-      load(); // rollback
+      load();
     }
   };
 
   const handleSave = async (payload, extras = {}) => {
+    // Final safety net — never create/move into the past.
+    if (isPastDate(payload.due_date)) {
+      alert('You can’t schedule a task in the past.');
+      return;
+    }
+
     if (modal.task) {
       const { data } = await api.put(`/tasks/${modal.task.id}`, payload);
       setTasks((prev) =>
-        prev.map((t) =>
-          t.id === modal.task.id ? { ...data, ...extras } : t
-        )
+        prev.map((t) => (t.id === modal.task.id ? { ...data, ...extras } : t))
       );
     } else {
       const { data } = await api.post('/tasks', payload);

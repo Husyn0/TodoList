@@ -3,21 +3,24 @@ import {
   WEEKDAYS,
   REPEAT_PRESETS,
   DEFAULT_REPEAT,
+  todayKey,
+  isPastDate,
 } from '../constants/task';
 
 export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
+  const isEditing = !!task;
   const [form, setForm] = useState({
     title: task?.title || '',
     description: task?.description || '',
-    due_date: task?.due_date?.split('T')[0] || initialDate,
+    due_date: task?.due_date?.split('T')[0] || initialDate || todayKey(),
     priority: task?.priority || 'medium',
     status: task?.status || 'pending',
     position: task?.position ?? 0,
-    // ---- static-until-backend fields ----
     meeting_time: task?.meeting_time || '',
     repeat: task?.repeat || DEFAULT_REPEAT,
   });
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   const toggleRepeatDay = (day) => {
     setForm((f) => {
@@ -31,10 +34,16 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
 
   const submit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    // Reject creating (or moving to) a past date
+    if (isPastDate(form.due_date)) {
+      setError('You can’t schedule a task in the past.');
+      return;
+    }
+
     setSaving(true);
     try {
-      // Backend doesn't support meeting_time / repeat yet.
-      // Keep them on the task locally; strip from the API payload.
       const { meeting_time, repeat, ...apiPayload } = form;
       await onSave(apiPayload, { meeting_time, repeat });
     } finally {
@@ -44,10 +53,16 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
 
   const showDayPicker = form.repeat.preset === 'custom';
 
+  // For new tasks: block past dates in the picker.
+  // For edits: don't set min, so the original past date stays selectable;
+  //            the submit guard above still prevents picking a *new* past date.
+  const dateMin = !isEditing ? todayKey() : undefined;
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <form className="modal" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
         <h2>{task ? 'Edit task' : 'New task'}</h2>
+        {error && <p className="error">{error}</p>}
 
         <label>Title
           <input required value={form.title}
@@ -61,8 +76,13 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
 
         <div className="row">
           <label>Date
-            <input type="date" required value={form.due_date}
-              onChange={(e) => setForm({ ...form, due_date: e.target.value })} />
+            <input
+              type="date"
+              required
+              min={dateMin}
+              value={form.due_date}
+              onChange={(e) => setForm({ ...form, due_date: e.target.value })}
+            />
           </label>
           <label>Meeting time
             <input type="time" value={form.meeting_time}
@@ -89,7 +109,6 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
           </label>
         </div>
 
-        {/* ---- Repeat ---- */}
         <label>Repeat
           <select
             value={form.repeat.preset}
