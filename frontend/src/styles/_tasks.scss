@@ -95,6 +95,27 @@
     font-size: 11px;
     color: $muted;
   }
+  &.repeated {
+    cursor: default;
+    background: #fafbff;
+    border-style: dashed;
+    // keep the left border a bit muted so it reads as "projected"
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 8px;
+      // nothing visual by default — hook for later
+    }
+  }
+
+  .task-repeat {
+    margin-top: 4px;
+    font-size: 11px;
+    color: $muted;
+    font-style: italic;
+  }
 
   .task-footer {
     display: flex;

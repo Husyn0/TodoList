@@ -1,16 +1,19 @@
 import { useDraggable } from '@dnd-kit/core';
 import { PRIORITY_LETTER, describeRepeat } from '../constants/task';
 
-export default function TaskCard({ task, onEdit, onDelete, preview }) {
+export default function TaskCard({ task, occurrenceDate, onEdit, onDelete, preview }) {
+  const isRepeated = task.repeat && task.repeat.preset !== 'none';
+  const repeatLabel = describeRepeat(task.repeat);
+
+  // Only non-repeated tasks are draggable (until backend supports per-occurrence move)
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
+    disabled: isRepeated || preview,
   });
 
   const style = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined;
-
-  const repeatLabel = describeRepeat(task.repeat);
 
   return (
     <div
@@ -18,7 +21,7 @@ export default function TaskCard({ task, onEdit, onDelete, preview }) {
       style={style}
       className={`task-card priority-${task.priority} status-${task.status} ${
         isDragging ? 'dragging' : ''
-      } ${preview ? 'preview' : ''}`}
+      } ${preview ? 'preview' : ''} ${isRepeated ? 'repeated' : ''}`}
       {...(preview ? {} : listeners)}
       {...(preview ? {} : attributes)}
     >
@@ -26,7 +29,10 @@ export default function TaskCard({ task, onEdit, onDelete, preview }) {
       {task.description && <p className="task-desc">{task.description}</p>}
 
       {repeatLabel && (
-        <div className="task-repeat">🔁 {repeatLabel}</div>
+        <div className="task-repeat">
+          ↻ {repeatLabel}
+          {occurrenceDate && isRepeated ? ' · occurrence' : ''}
+        </div>
       )}
 
       <div className="task-footer">

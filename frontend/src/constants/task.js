@@ -21,6 +21,9 @@ export const REPEAT_PRESETS = [
 
 export const DEFAULT_REPEAT = { preset: 'none', days: [] };
 
+// JS Date.getDay(): 0=Sun … 6=Sat  →  our short keys
+export const DAY_KEY_BY_INDEX = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
 export const describeRepeat = (repeat) => {
   if (!repeat || repeat.preset === 'none') return null;
   if (repeat.preset === 'daily')  return 'Every day';
@@ -33,4 +36,34 @@ export const describeRepeat = (repeat) => {
     return labels.join(' · ');
   }
   return null;
+};
+
+/**
+ * Does this task occur on the given Date?
+ *  - No repeat  → only on its own due_date.
+ *  - daily      → every day from due_date onward (within the visible week).
+ *  - weekly     → same weekday as due_date.
+ *  - custom     → any day in repeat.days, from due_date onward.
+ */
+export const occursOnDate = (task, date) => {
+  const key = date.toISOString().split('T')[0];
+  const dueKey = task.due_date?.split('T')[0];
+  const repeat = task.repeat;
+
+  // No repeat → only on due date
+  if (!repeat || repeat.preset === 'none') return key === dueKey;
+
+  // Never show before it starts
+  if (dueKey && key < dueKey) return false;
+
+  const dayKey = DAY_KEY_BY_INDEX[date.getDay()];
+
+  if (repeat.preset === 'daily')  return true;
+  if (repeat.preset === 'weekly') {
+    const dueDay = dueKey ? DAY_KEY_BY_INDEX[new Date(dueKey).getDay()] : null;
+    return dayKey === dueDay;
+  }
+  if (repeat.preset === 'custom') return repeat.days?.includes(dayKey) ?? false;
+
+  return key === dueKey;
 };

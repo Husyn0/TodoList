@@ -6,6 +6,7 @@ import {
 import api from '../api/client';
 import TaskCard from '../components/TaskCard';
 import AddTaskModal from '../components/AddTaskModal';
+import { occursOnDate } from '../constants/task';
 
 const startOfWeek = (date, weekStart = 'monday') => {
   const d = new Date(date);
@@ -30,7 +31,13 @@ function DayColumn({ date, tasks, onAdd, onEdit, onDelete }) {
       </header>
       <div className="tasks-list">
         {tasks.map((t) => (
-          <TaskCard key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} />
+          <TaskCard
+            key={`${t.id}-${key}`}   // unique per (task, day) occurrence
+            task={t}
+            occurrenceDate={key}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
         ))}
       </div>
       <button className="add-task-btn" onClick={() => onAdd(key)}>+</button>
@@ -61,9 +68,11 @@ export default function Tasks() {
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  const tasksByDay = (dateKey) =>
-    tasks.filter((t) => t.due_date?.split('T')[0] === dateKey)
-         .sort((a, b) => a.position - b.position);
+  // Fan out repeats across the visible week
+  const tasksByDay = (date) =>
+    tasks
+      .filter((t) => occursOnDate(t, date))
+      .sort((a, b) => a.position - b.position);
 
   const handleDragStart = (e) => {
     setActiveTask(tasks.find((t) => t.id === e.active.id));
@@ -77,7 +86,13 @@ export default function Tasks() {
     const taskId = active.id;
     const targetDate = over.id;
     const task = tasks.find((t) => t.id === taskId);
-    if (!task || task.due_date?.split('T')[0] === targetDate) return;
+    if (!task) return;
+
+    // Repeated tasks would need to move only one occurrence,
+    // which requires backend support — skip until then.
+    if (task.repeat && task.repeat.preset !== 'none') return;
+
+    if (task.due_date?.split('T')[0] === targetDate) return;
 
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, due_date: targetDate } : t))
@@ -90,11 +105,9 @@ export default function Tasks() {
     }
   };
 
-  // `extras` carries static-only fields (meeting_time, repeat)
   const handleSave = async (payload, extras = {}) => {
     if (modal.task) {
       const { data } = await api.put(`/tasks/${modal.task.id}`, payload);
-      // merge static fields back onto the returned task
       setTasks((prev) =>
         prev.map((t) =>
           t.id === modal.task.id ? { ...data, ...extras } : t
@@ -102,7 +115,6 @@ export default function Tasks() {
       );
     } else {
       const { data } = await api.post('/tasks', payload);
-      // optimistic insert with static fields merged
       setTasks((prev) => [...prev, { ...data, ...extras }]);
     }
     setModal({ open: false, date: null, task: null });
@@ -142,7 +154,7 @@ export default function Tasks() {
             <DayColumn
               key={fmt(d)}
               date={d}
-              tasks={tasksByDay(fmt(d))}
+              tasks={tasksByDay(d)}
               onAdd={(date) => setModal({ open: true, date, task: null })}
               onEdit={(task) => setModal({ open: true, date: null, task })}
               onDelete={handleDelete}
