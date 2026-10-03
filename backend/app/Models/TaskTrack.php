@@ -4,26 +4,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Task extends Model
+class TaskTrack extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'title',
-        'description',
-        'due_date',
-        'priority',
+        'task_id',
+        'date',
         'status',
-        'position',
-        'repeat_preset',
-        'repeat_days',
         'meeting_time',
     ];
 
     protected $casts = [
-        'due_date'    => 'date',
-        'repeat_days' => 'array',
+        'date' => 'date',
     ];
 
     public function user()
@@ -31,8 +25,8 @@ class Task extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function tracks()
+    public function task()
     {
-        return $this->hasMany(TaskTrack::class);
+        return $this->belongsTo(Task::class);
     }
 }
