@@ -34,5 +34,10 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'frontend' => [
+        'url'         => env('FRONTEND_URL', 'http://localhost:5173'),
+        'verify_path' => env('FRONTEND_VERIFY_PATH', '/verify-email'),
+        'reset_path'  => env('FRONTEND_RESET_PATH', '/reset-password'),
+    ],
 
 ];
