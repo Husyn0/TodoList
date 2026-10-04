@@ -3,13 +3,13 @@
 export const PRIORITY_LETTER = { low: 'L', medium: 'M', high: 'H' };
 
 export const WEEKDAYS = [
-  { value: 'mon', label: 'Mon' },
-  { value: 'tue', label: 'Tue' },
-  { value: 'wed', label: 'Wed' },
-  { value: 'thu', label: 'Thu' },
-  { value: 'fri', label: 'Fri' },
-  { value: 'sat', label: 'Sat' },
-  { value: 'sun', label: 'Sun' },
+  { value: 'monday',    label: 'Mon' },
+  { value: 'tuesday',   label: 'Tue' },
+  { value: 'wednesday', label: 'Wed' },
+  { value: 'thursday',  label: 'Thu' },
+  { value: 'friday',    label: 'Fri' },
+  { value: 'saturday',  label: 'Sat' },
+  { value: 'sunday',    label: 'Sun' },
 ];
 
 export const REPEAT_PRESETS = [
@@ -21,9 +21,36 @@ export const REPEAT_PRESETS = [
 
 export const DEFAULT_REPEAT = { preset: 'none', days: [] };
 
-// JS Date.getDay(): 0=Sun … 6=Sat  →  our short keys
-export const DAY_KEY_BY_INDEX = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+// JS Date.getDay(): 0=Sun … 6=Sat → full names (backend format)
+export const DAY_KEY_BY_INDEX = [
+  'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday',
+];
 
+// ---------- backend <-> frontend mapping ----------
+export const normalizeTask = (t) => ({
+  ...t,
+  due_date: t.due_date ? String(t.due_date).split('T')[0] : t.due_date,
+  meeting_time: (t.meeting_time || '').slice(0, 5),
+  repeat: {
+    preset: t.repeat_preset ?? 'none',
+    days: t.repeat_days ?? [],
+  },
+});
+
+export const denormalizeTask = (form) => {
+  const { repeat, meeting_time, ...rest } = form;
+  const mt = meeting_time
+    ? (meeting_time.length === 5 ? `${meeting_time}:00` : meeting_time)
+    : null;
+  return {
+    ...rest,
+    meeting_time: mt,
+    repeat_preset: repeat?.preset ?? 'none',
+    repeat_days: repeat?.preset === 'custom' ? repeat.days : null,
+  };
+};
+
+// ---------- UI helpers ----------
 export const describeRepeat = (repeat) => {
   if (!repeat || repeat.preset === 'none') return null;
   if (repeat.preset === 'daily')  return 'Every day';
@@ -47,13 +74,10 @@ export const describeRepeat = (repeat) => {
  */
 export const occursOnDate = (task, date) => {
   const key = date.toISOString().split('T')[0];
-  const dueKey = task.due_date?.split('T')[0];
+  const dueKey = task.due_date ? String(task.due_date).split('T')[0] : null;
   const repeat = task.repeat;
 
-  // No repeat → only on due date
   if (!repeat || repeat.preset === 'none') return key === dueKey;
-
-  // Never show before it starts
   if (dueKey && key < dueKey) return false;
 
   const dayKey = DAY_KEY_BY_INDEX[date.getDay()];
@@ -68,7 +92,7 @@ export const occursOnDate = (task, date) => {
   return key === dueKey;
 };
 
-// ---- date helpers ----
+// ---------- date helpers ----------
 export const todayKey = () => {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
@@ -79,13 +103,11 @@ export const isPastDate = (key) => {
   if (!key) return false;
   return key < todayKey();
 };
-// ---- track helpers (static until backend exists) ----
 
+// ---------- track helpers ----------
 export const trackKey = (taskId, dateKey) => `${taskId}__${dateKey}`;
 
-// Deterministic fallback status when no track exists yet.
-// Non-repeated tasks fall back to their task.status;
-// repeated tasks default to 'pending' per day.
+// Fallback status when no track exists yet.
 export const statusForOccurrence = (tracks, task, dateKey) => {
   const k = trackKey(task.id, dateKey);
   if (tracks[k]) return tracks[k].status;
@@ -95,5 +117,6 @@ export const statusForOccurrence = (tracks, task, dateKey) => {
 
 export const meetingTimeForOccurrence = (tracks, task, dateKey) => {
   const k = trackKey(task.id, dateKey);
-  return tracks[k]?.meeting_time ?? task.meeting_time ?? '';
+  const mt = tracks[k]?.meeting_time ?? task.meeting_time ?? '';
+  return (mt || '').slice(0, 5);
 };

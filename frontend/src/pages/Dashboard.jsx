@@ -24,13 +24,22 @@ const startOfWeek = (date, weekStart = 'monday') => {
 
 const fmt = (d) => d.toISOString().split('T')[0];
 
-const CONTRIB_WEEKS = 53;
+const CONTRIB_MONTHS = 13;
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [weekTasks, setWeekTasks] = useState([]);
   const [rangeTasks, setRangeTasks] = useState([]);
-  const [weekStart] = useState(() => startOfWeek(new Date()));
+  const [weekStart, setWeekStart] = useState(() =>
+    startOfWeek(new Date(), user?.week_start || 'monday')
+  );
+
+  // Sync weekStart when user preference loads/changes
+  useEffect(() => {
+    if (user?.week_start) {
+      setWeekStart(startOfWeek(new Date(), user.week_start));
+    }
+  }, [user?.week_start]);
 
   // current week → radar
   useEffect(() => {
@@ -43,9 +52,14 @@ export default function Dashboard() {
   // ~1 year back → contribution chart
   useEffect(() => {
     let cancelled = false;
-    tasksApi.getTasksRange(13).then((tasks) => {
-      if (!cancelled) setRangeTasks(tasks);
-    });
+    tasksApi
+      .getTasksRange(CONTRIB_MONTHS)
+      .then((tasks) => {
+        if (!cancelled) setRangeTasks(tasks);
+      })
+      .catch(() => {
+        if (!cancelled) setRangeTasks([]);
+      });
     return () => {
       cancelled = true;
     };
@@ -132,7 +146,7 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
 
-        <ContributionChart tasks={rangeTasks} weeks={CONTRIB_WEEKS} />
+        <ContributionChart tasks={rangeTasks} weeks={53} />
       </div>
     </div>
   );

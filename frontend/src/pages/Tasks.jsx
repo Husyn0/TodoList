@@ -4,6 +4,7 @@ import AddTaskModal from '../components/AddTaskModal';
 import TasksHeader from '../components/tasks/TasksHeader';
 import WeekBoard from '../components/tasks/WeekBoard';
 import { tasksApi, tracksApi } from '../api';
+import { useAuth } from '../context/AuthContext';
 import {
   occursOnDate,
   isPastDate,
@@ -24,11 +25,21 @@ const startOfWeek = (date, weekStart = 'monday') => {
 const fmt = (d) => d.toISOString().split('T')[0];
 
 export default function Tasks() {
-  const [weekStart, setWeekStart] = useState(startOfWeek(new Date()));
+  const { user } = useAuth();
+  const [weekStart, setWeekStart] = useState(() =>
+    startOfWeek(new Date(), user?.week_start || 'monday')
+  );
   const [tasks, setTasks] = useState([]);
   const [tracks, setTracks] = useState({});
   const [activeTask, setActiveTask] = useState(null);
   const [modal, setModal] = useState({ open: false, date: null, task: null });
+
+  // Sync weekStart when user preference loads/changes
+  useEffect(() => {
+    if (user?.week_start) {
+      setWeekStart(startOfWeek(new Date(), user.week_start));
+    }
+  }, [user?.week_start]);
 
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(weekStart);
@@ -80,7 +91,7 @@ export default function Tasks() {
     );
 
     try {
-      await tasksApi.moveTask(taskId, targetDate);
+      await tasksApi.moveTask(taskId, targetDate, task.position ?? 0);
     } catch {
       load();
     }
@@ -88,13 +99,14 @@ export default function Tasks() {
 
   const handleToggleDone = async (task, dateKey, checked) => {
     const nextStatus = checked ? 'done' : 'pending';
-    await upsertTrackLocal(task.id, dateKey, {
-      status: nextStatus,
-      completed_at: checked ? new Date().toISOString() : null,
-    });
+    try {
+      await upsertTrackLocal(task.id, dateKey, { status: nextStatus });
+    } catch {
+      load();
+    }
   };
 
-  const handleSave = async (payload, extras = {}) => {
+  const handleSave = async (payload) => {
     if (isPastDate(payload.due_date)) {
       alert('You can’t schedule a task in the past.');
       return;
@@ -102,12 +114,10 @@ export default function Tasks() {
 
     if (modal.task) {
       const data = await tasksApi.updateTask(modal.task.id, payload);
-      setTasks((prev) =>
-        prev.map((t) => (t.id === modal.task.id ? { ...data, ...extras } : t))
-      );
+      setTasks((prev) => prev.map((t) => (t.id === modal.task.id ? data : t)));
     } else {
       const data = await tasksApi.createTask(payload);
-      setTasks((prev) => [...prev, { ...data, ...extras }]);
+      setTasks((prev) => [...prev, data]);
     }
     setModal({ open: false, date: null, task: null });
   };

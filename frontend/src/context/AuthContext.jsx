@@ -5,6 +5,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [emailVerified, setEmailVerified] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,7 +14,10 @@ export const AuthProvider = ({ children }) => {
 
     authApi
       .getMe()
-      .then((data) => setUser(data))
+      .then((data) => {
+        setUser(data.user ?? data);
+        setEmailVerified(!!(data.email_verified ?? data.user?.email_verified_at));
+      })
       .catch(() => localStorage.removeItem('token'))
       .finally(() => setLoading(false));
   }, []);
@@ -22,6 +26,7 @@ export const AuthProvider = ({ children }) => {
     const data = await authApi.login(email, password);
     localStorage.setItem('token', data.token);
     setUser(data.user);
+    setEmailVerified(!!data.email_verified);
   };
 
   const register = async (name, email, password, password_confirmation) => {
@@ -33,17 +38,36 @@ export const AuthProvider = ({ children }) => {
     });
     localStorage.setItem('token', data.token);
     setUser(data.user);
+    setEmailVerified(!!data.email_verified);
   };
 
   const logout = async () => {
     await authApi.logout();
     localStorage.removeItem('token');
     setUser(null);
+    setEmailVerified(true);
+  };
+
+  const refreshMe = async () => {
+    const data = await authApi.getMe();
+    setUser(data.user ?? data);
+    setEmailVerified(!!(data.email_verified ?? data.user?.email_verified_at));
+    return data;
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, register, logout, setUser }}
+      value={{
+        user,
+        emailVerified,
+        loading,
+        login,
+        register,
+        logout,
+        setUser,
+        setEmailVerified,
+        refreshMe,
+      }}
     >
       {children}
     </AuthContext.Provider>

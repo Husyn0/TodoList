@@ -16,7 +16,7 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
     priority: task?.priority || 'medium',
     status: task?.status || 'pending',
     position: task?.position ?? 0,
-    meeting_time: task?.meeting_time || '',
+    meeting_time: (task?.meeting_time || '').slice(0, 5),
     repeat: task?.repeat || DEFAULT_REPEAT,
   });
   const [saving, setSaving] = useState(false);
@@ -36,7 +36,6 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
     e.preventDefault();
     setError('');
 
-    // Reject creating (or moving to) a past date
     if (isPastDate(form.due_date)) {
       setError('You can’t schedule a task in the past.');
       return;
@@ -44,38 +43,48 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
 
     setSaving(true);
     try {
-      const { meeting_time, repeat, ...apiPayload } = form;
-      await onSave(apiPayload, { meeting_time, repeat });
+      await onSave(form);
+    } catch (err) {
+      const errors = err?.response?.data?.errors;
+      setError(errors ? Object.values(errors)[0][0] : 'Save failed');
     } finally {
       setSaving(false);
     }
   };
 
   const showDayPicker = form.repeat.preset === 'custom';
-
-  // For new tasks: block past dates in the picker.
-  // For edits: don't set min, so the original past date stays selectable;
-  //            the submit guard above still prevents picking a *new* past date.
   const dateMin = !isEditing ? todayKey() : undefined;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <form className="modal" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
+      <form
+        className="modal"
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={submit}
+      >
         <h2>{task ? 'Edit task' : 'New task'}</h2>
         {error && <p className="error">{error}</p>}
 
-        <label>Title
-          <input required value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })} />
+        <label>
+          Title
+          <input
+            required
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+          />
         </label>
 
-        <label>Description
-          <textarea value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })} />
+        <label>
+          Description
+          <textarea
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
         </label>
 
         <div className="row">
-          <label>Date
+          <label>
+            Date
             <input
               type="date"
               required
@@ -84,24 +93,36 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
               onChange={(e) => setForm({ ...form, due_date: e.target.value })}
             />
           </label>
-          <label>Meeting time
-            <input type="time" value={form.meeting_time}
-              onChange={(e) => setForm({ ...form, meeting_time: e.target.value })} />
+          <label>
+            Meeting time
+            <input
+              type="time"
+              value={form.meeting_time}
+              onChange={(e) =>
+                setForm({ ...form, meeting_time: e.target.value })
+              }
+            />
           </label>
         </div>
 
         <div className="row">
-          <label>Priority
-            <select value={form.priority}
-              onChange={(e) => setForm({ ...form, priority: e.target.value })}>
+          <label>
+            Priority
+            <select
+              value={form.priority}
+              onChange={(e) => setForm({ ...form, priority: e.target.value })}
+            >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
           </label>
-          <label>Status
-            <select value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value })}>
+          <label>
+            Status
+            <select
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+            >
               <option value="pending">Pending</option>
               <option value="in_progress">In Progress</option>
               <option value="done">Done</option>
@@ -109,7 +130,8 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
           </label>
         </div>
 
-        <label>Repeat
+        <label>
+          Repeat
           <select
             value={form.repeat.preset}
             onChange={(e) =>
@@ -120,7 +142,9 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
             }
           >
             {REPEAT_PRESETS.map((p) => (
-              <option key={p.value} value={p.value}>{p.label}</option>
+              <option key={p.value} value={p.value}>
+                {p.label}
+              </option>
             ))}
           </select>
         </label>
@@ -144,7 +168,9 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
         )}
 
         <div className="modal-actions">
-          <button type="button" onClick={onClose}>Cancel</button>
+          <button type="button" onClick={onClose}>
+            Cancel
+          </button>
           <button type="submit" disabled={saving}>
             {saving ? 'Saving…' : 'Save'}
           </button>
