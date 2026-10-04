@@ -26,7 +26,8 @@ Using a timestamped email so every run starts clean.
 ```bash
 EMAIL="test+$(date +%s)@example.com"
 PASSWORD="password123"
-
+```
+```bash
 RESP=$(curl -s -X POST http://localhost:8000/api/register \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
@@ -56,7 +57,7 @@ test -n "$TOKEN" && test "$TOKEN" != "null" && echo "OK" || echo "FAILED"
 ```bash
 echo "with token:"; curl -s http://localhost:8000/api/me \
   -H "Accept: application/json" \
-  -H "Authorization: Bearer $TOKEN" | jq '.email'
+  -H "Authorization: Bearer $TOKEN" | jq '{email: .user.email, verified: .email_verified}'
 
 echo "without token:"; curl -s -o /dev/null -w "%{http_code}\n" \
   http://localhost:8000/api/me -H "Accept: application/json"
@@ -252,6 +253,34 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/api/me \
 **Expected:** `"Logged out"`, then `401`.
 
 ---
+
+---
+
+## 12. Email verification & password reset — smoke
+
+```bash
+# register
+TAG=$(date +%s)
+EMAIL="m+$TAG@example.com"
+RESP=$(curl -s -X POST http://localhost:8000/api/register \
+  -H "Content-Type: application/json" -H "Accept: application/json" \
+  -d "{\"name\":\"M\",\"email\":\"$EMAIL\",\"password\":\"password123\",\"password_confirmation\":\"password123\"}")
+TOKEN=$(echo "$RESP" | jq -r .token)
+echo "$RESP" | jq '{id: .user.id, verified: .email_verified}'
+
+# verification status
+curl -s http://localhost:8000/api/email/verification-status \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# forgot-password (email arrives in debug inbox — see test-emails-2.md for full flow)
+curl -s -X POST http://localhost:8000/api/forgot-password \
+  -H "Content-Type: application/json" -H "Accept: application/json" \
+  -d "{\"email\":\"$EMAIL\"}" | jq .status
+```
+**Expected:** `verified: false`, status endpoint returns `verified: false`, forgot-password returns `"passwords.sent"`.
+
+For the full verification click-through and reset-with-token flow, run `test-emails-2.md`.
 
 ## Notes
 
