@@ -1,0 +1,19 @@
+// src/styles/_theme.scss
+:root,
+[data-theme='light'] {
+  --app-bg:       #f4f6fb;
+  --app-surface:  #ffffff;
+  --app-text:     #1c2033;
+  --app-muted:    #67708a;
+  --app-border:   #e1e5f0;
+  --app-shadow:   0 4px 14px rgba(20, 30, 70, .06);
+}
+
+[data-theme='dark'] {
+  --app-bg:       #0f1117;
+  --app-surface:  #1a1c25;
+  --app-text:     #e5e7eb;
+  --app-muted:    #9ca3af;
+  --app-border:   #2e303a;
+  --app-shadow:   0 4px 14px rgba(0, 0, 0, .5);
+}

@@ -1,20 +1,16 @@
+@use 'theme';       // ← first, so variables exist before use
 @use 'variables' as *;
 @use 'mixins' as *;
-
-// pages
 @use 'auth';
 @use 'tasks';
 @use 'dashboard';
 @use 'settings';
-
-// shared components
 @use 'components/layout';
 @use 'components/toast';
 @use 'components/task-card';
 @use 'components/day-column';
 @use 'components/modal';
 
-// ---------- global resets & shell ----------
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
 
@@ -22,6 +18,7 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
   background: $bg;
   color: $text;
+  transition: background .15s, color .15s;
 }
 
 button { cursor: pointer; font: inherit; }

@@ -24,7 +24,7 @@
   font: inherit;
   font-size: 14px;
   color: $text;
-  background: white;
+  background: $surface;
   transition: border-color $transition, box-shadow $transition;
 
   &:focus {
@@ -39,6 +39,7 @@
   border: 1px solid $border;
   border-radius: $radius-sm;
   font: inherit;
+  background: $surface;
   color: $text;
 
   &:focus {

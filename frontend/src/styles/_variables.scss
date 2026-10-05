@@ -1,18 +1,18 @@
-$bg: #f4f6fb;
-$surface: #ffffff;
-$text: #1c2033;
-$muted: #67708a;
-$primary: #4a6cf7;
-$primary-dark: #040a25;
-$border: #e1e5f0;
-$danger: #ef4444;
-$low: #10b981;
-$medium: #f59e0b;
-$high: #ef4444;
+// Semantic colors driven by CSS variables — theme switch is automatic.
+$bg:            var(--app-bg);
+$surface:       var(--app-surface);
+$text:          var(--app-text);
+$muted:         var(--app-muted);
+$primary:       #4a6cf7;
+$primary-dark:  #040a25;
+$border:        var(--app-border);
+$danger:        #ef4444;
+$low:           #10b981;
+$medium:        #f59e0b;
+$high:          #ef4444;
 $radius: 12px;
-$shadow: 0 4px 14px rgba(20, 30, 70, .06);
+$shadow: var(--app-shadow);
 
-// semantic
 $radius-sm: 8px;
 $radius-pill: 20px;
 $transition: .15s;

@@ -1,6 +1,5 @@
 @use 'variables' as *;
 @use 'mixins' as *;
-@use 'sass:color';
 
 .settings-page {
   display: flex;
@@ -76,7 +75,8 @@
         @include input-base;
 
         &::placeholder {
-          color: color.adjust($muted, $lightness: 20%);
+          color: $muted;
+          opacity: .6;
         }
       }
 

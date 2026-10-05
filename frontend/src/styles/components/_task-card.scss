@@ -3,7 +3,7 @@
 
 .task-card {
   position: relative;
-  background: white;
+  background: $surface;
   border: 1px solid $border;
   border-left: 4px solid $medium;
   border-radius: $radius-sm;
@@ -61,7 +61,7 @@
       height: 16px;
       border: 2px solid $border;
       border-radius: 5px;
-      background: white;
+      background: $surface;
       display: inline-flex;
       align-items: center;
       justify-content: center;

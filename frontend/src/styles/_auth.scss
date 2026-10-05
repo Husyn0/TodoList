@@ -5,8 +5,9 @@
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #eef2ff, #f4f6fb);
+  background: $bg;
   padding: 20px;
+  transition: background .15s;
 }
 
 .auth-card {

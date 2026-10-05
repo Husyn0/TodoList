@@ -140,3 +140,15 @@
     &:hover { transform: none; }
   }
 }
+// at the end of _dashboard.scss
+[data-theme='dark'] .contrib-chart {
+  .contrib-square {
+    background: #1c1f28;
+    &.level-0     { background: #1c1f28; }
+    &.level-1     { background: #0e4429; }
+    &.level-2     { background: #006d32; }
+    &.level-3     { background: #26a641; }
+    &.level-4     { background: #39d353; }
+    &.level-empty { background: transparent; }
+  }
+}
