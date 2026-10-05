@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { settingsApi } from '../api';
 import { useAuth } from '../context/AuthContext';
+import TimezoneSelect from '../components/TimezoneSelect';
+import { detectTimezone } from '../constants/timezones';
 
 export default function Settings() {
   const { setUser } = useAuth();
   const [form, setForm] = useState({
     name: '',
     theme: 'light',
-    timezone: 'UTC',
+    timezone: detectTimezone(),
     week_start: 'monday',
   });
   const [pwd, setPwd] = useState({
@@ -122,12 +124,9 @@ export default function Settings() {
 
             <label className="field">
               <span>Timezone</span>
-              <input
+              <TimezoneSelect
                 value={form.timezone}
-                onChange={(e) =>
-                  setForm({ ...form, timezone: e.target.value })
-                }
-                placeholder="e.g. Asia/Beirut"
+                onChange={(tz) => setForm({ ...form, timezone: tz })}
               />
             </label>
 

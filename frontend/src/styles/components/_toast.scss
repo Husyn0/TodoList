@@ -1,6 +1,5 @@
 @use '../variables' as *;
 @use '../mixins' as *;
-@use 'sass:color';
 
 .toast {
   padding: 10px 16px;
@@ -11,7 +10,7 @@
 
   &.success {
     background: rgba($low, .12);
-    color: color.adjust($low, $lightness: -10%);
+    color: #0a7a55;                // darker green, works on light bg
     border: 1px solid rgba($low, .3);
   }
 
@@ -19,5 +18,16 @@
     background: rgba($danger, .1);
     color: $danger;
     border: 1px solid rgba($danger, .3);
+  }
+}
+
+[data-theme='dark'] .toast {
+  &.success {
+    color: #34d399;                // lighter green on dark bg
+    background: rgba($low, .15);
+  }
+  &.error {
+    color: #fca5a5;
+    background: rgba($danger, .15);
   }
 }

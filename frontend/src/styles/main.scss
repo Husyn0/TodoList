@@ -10,6 +10,7 @@
 @use 'components/task-card';
 @use 'components/day-column';
 @use 'components/modal';
+@use 'components/timezone-select';
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }

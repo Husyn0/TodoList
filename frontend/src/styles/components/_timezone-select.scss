@@ -1,0 +1,98 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.tz-select {
+  position: relative;
+  width: 100%;
+}
+
+.tz-trigger {
+  @include input-base;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+  background: $surface;
+  color: $text;
+
+  &.open {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, .15);
+  }
+
+  .tz-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+
+  .tz-caret {
+    flex: 0 0 auto;
+    color: $muted;
+    font-size: 11px;
+    transform: translateY(-1px);
+  }
+}
+
+.tz-panel {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  box-shadow: 0 12px 30px rgba(20, 30, 70, .12);
+  display: flex;
+  flex-direction: column;
+  max-height: 320px;
+  overflow: hidden;
+
+  [data-theme='dark'] & {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .55);
+  }
+}
+
+.tz-search {
+  @include input-plain;
+  margin: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.tz-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 6px 6px;
+  overflow-y: auto;
+  max-height: 250px;
+}
+
+.tz-item {
+  padding: 7px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: $text;
+
+  &.is-highlighted {
+    background: rgba($primary, .1);
+  }
+
+  &.is-selected {
+    color: $primary;
+    font-weight: 600;
+  }
+}
+
+.tz-empty {
+  padding: 10px;
+  font-size: 13px;
+  color: $muted;
+  text-align: center;
+}
