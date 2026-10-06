@@ -21,6 +21,7 @@ export default function Settings() {
   const [msgType, setMsgType] = useState('success');
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPwd, setSavingPwd] = useState(false);
+  const [savingTheme, setSavingTheme] = useState(false);
   const [resending, setResending] = useState(false);
   const [verifyMsg, setVerifyMsg] = useState('');
 
@@ -34,11 +35,19 @@ export default function Settings() {
     setTimeout(() => setMsg(''), 2500);
   };
 
+  // ---- Profile (name, week_start, timezone) ----
   const saveProfile = async (e) => {
     e.preventDefault();
     setSavingProfile(true);
     try {
-      const data = await settingsApi.updateSettings(form);
+      // Preserve current theme — this form no longer edits it
+      const payload = {
+        name: form.name,
+        theme: user?.theme || form.theme,
+        timezone: form.timezone,
+        week_start: form.week_start,
+      };
+      const data = await settingsApi.updateSettings(payload);
       setUser(data.user);
       flash('Profile updated');
     } catch (err) {
@@ -49,6 +58,34 @@ export default function Settings() {
     }
   };
 
+  // ---- Theme (immediate) ----
+  const setTheme = async (next) => {
+    if (next === form.theme) return;
+    const prev = form.theme;
+    // optimistic: update local state and DOM immediately
+    setForm((f) => ({ ...f, theme: next }));
+    document.documentElement.setAttribute('data-theme', next);
+    setSavingTheme(true);
+    try {
+      const data = await settingsApi.updateSettings({
+        name: form.name,
+        theme: next,
+        timezone: form.timezone,
+        week_start: form.week_start,
+      });
+      setUser(data.user);
+      flash(`Theme set to ${next}`);
+    } catch (err) {
+      // roll back
+      setForm((f) => ({ ...f, theme: prev }));
+      document.documentElement.setAttribute('data-theme', prev);
+      flash('Could not change theme', 'error');
+    } finally {
+      setSavingTheme(false);
+    }
+  };
+
+  // ---- Password ----
   const savePassword = async (e) => {
     e.preventDefault();
     setSavingPwd(true);
@@ -67,6 +104,7 @@ export default function Settings() {
     }
   };
 
+  // ---- Email verification ----
   const resendVerification = async () => {
     setResending(true);
     setVerifyMsg('');
@@ -109,13 +147,13 @@ export default function Settings() {
           <div className="verify-row">
             <span className="verify-status">
               <span className={`dot ${emailVerified ? 'ok' : 'warn'}`} />
-              {user?.email}
+              <span className="verify-email">{user?.email}</span>
             </span>
 
             {!emailVerified && (
               <button
                 type="button"
-                className="btn primary"
+                className="verify-btn"
                 onClick={resendVerification}
                 disabled={resending}
               >
@@ -127,13 +165,49 @@ export default function Settings() {
           {verifyMsg && <p className="verify-msg">{verifyMsg}</p>}
         </section>
 
+        {/* ---------- Appearance (theme) ---------- */}
+        <section className="settings-card">
+          <div className="card-head">
+            <h2>Appearance</h2>
+            <p className="muted">Pick how the app looks. Changes save instantly.</p>
+          </div>
+
+          <div className="theme-picker">
+            <button
+              type="button"
+              className={`theme-option ${form.theme === 'light' ? 'active' : ''}`}
+              onClick={() => setTheme('light')}
+              disabled={savingTheme}
+            >
+              <span className="theme-preview theme-preview-light">
+                <span className="theme-preview-bar" />
+                <span className="theme-preview-line" />
+                <span className="theme-preview-line short" />
+              </span>
+              <span className="theme-label">Light</span>
+            </button>
+
+            <button
+              type="button"
+              className={`theme-option ${form.theme === 'dark' ? 'active' : ''}`}
+              onClick={() => setTheme('dark')}
+              disabled={savingTheme}
+            >
+              <span className="theme-preview theme-preview-dark">
+                <span className="theme-preview-bar" />
+                <span className="theme-preview-line" />
+                <span className="theme-preview-line short" />
+              </span>
+              <span className="theme-label">Dark</span>
+            </button>
+          </div>
+        </section>
+
         {/* ---------- Profile ---------- */}
         <section className="settings-card">
           <div className="card-head">
             <h2>Profile</h2>
-            <p className="muted">
-              Your name, theme and scheduling preferences.
-            </p>
+            <p className="muted">Your name and scheduling preferences.</p>
           </div>
 
           <form onSubmit={saveProfile} className="settings-form">
@@ -146,31 +220,18 @@ export default function Settings() {
               />
             </label>
 
-            <div className="row">
-              <label className="field">
-                <span>Theme</span>
-                <select
-                  value={form.theme}
-                  onChange={(e) => setForm({ ...form, theme: e.target.value })}
-                >
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                </select>
-              </label>
-
-              <label className="field">
-                <span>Week starts on</span>
-                <select
-                  value={form.week_start}
-                  onChange={(e) =>
-                    setForm({ ...form, week_start: e.target.value })
-                  }
-                >
-                  <option value="monday">Monday</option>
-                  <option value="sunday">Sunday</option>
-                </select>
-              </label>
-            </div>
+            <label className="field">
+              <span>Week starts on</span>
+              <select
+                value={form.week_start}
+                onChange={(e) =>
+                  setForm({ ...form, week_start: e.target.value })
+                }
+              >
+                <option value="monday">Monday</option>
+                <option value="sunday">Sunday</option>
+              </select>
+            </label>
 
             <label className="field">
               <span>Timezone</span>

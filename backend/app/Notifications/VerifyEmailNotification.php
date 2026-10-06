@@ -33,6 +33,7 @@ class VerifyEmailNotification extends BaseVerifyEmail
     public function toMail($notifiable): MailMessage
     {
         $url = $this->buildVerifyUrl($notifiable);
+        
 
         return (new MailMessage)
             ->subject('Verify your email address')

@@ -11,36 +11,34 @@ class EmailVerificationController extends Controller
 {
     /**
      * GET /api/email/verify/{id}/{hash}
-     * Called by the API from the frontend after the user clicks the email link.
-     * The `signed` middleware already validated expires + signature.
+     * Browser lands here directly from the email link.
+     * On success/failure we REDIRECT to the SPA (never return JSON here).
      */
     public function verify(Request $request, int $id, string $hash)
     {
+        $frontend = rtrim(config('app.frontend_url', 'http://localhost:5173'), '/');
+
         $user = User::find($id);
 
         if (! $user) {
-            return response()->json(['message' => 'User not found.'], 404);
+            return redirect("{$frontend}/verify-email?status=error&reason=user");
         }
 
         if (! hash_equals($hash, sha1($user->getEmailForVerification()))) {
-            return response()->json(['message' => 'Invalid verification link.'], 403);
+            return redirect("{$frontend}/verify-email?status=error&reason=hash");
         }
 
         if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified.']);
+            return redirect("{$frontend}/verify-email?status=success&already=1");
         }
 
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
         }
 
-        return response()->json(['message' => 'Email verified successfully.']);
+        return redirect("{$frontend}/verify-email?status=success");
     }
 
-    /**
-     * POST /api/email/verification-notification
-     * Requires auth. Resends the verification email.
-     */
     public function resend(Request $request)
     {
         if ($request->user()->hasVerifiedEmail()) {
@@ -52,10 +50,6 @@ class EmailVerificationController extends Controller
         return response()->json(['message' => 'Verification link sent.'], 202);
     }
 
-    /**
-     * GET /api/email/verification-status
-     * Requires auth. Reports whether the current user is verified.
-     */
     public function status(Request $request)
     {
         return response()->json([

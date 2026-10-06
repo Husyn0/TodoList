@@ -94,3 +94,152 @@
     .btn.primary { @include btn-primary; }
   }
 }
+/* ============================================================
+   Appearance card — theme picker
+   ============================================================ */
+
+.settings-page .theme-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.settings-page .theme-option {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 2px solid $border;
+  border-radius: $radius-sm;
+  background: $surface;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s, transform .1s;
+
+  &:hover:not(:disabled) {
+    border-color: rgba($primary, .5);
+  }
+
+  &:disabled {
+    opacity: .7;
+    cursor: wait;
+  }
+
+  &.active {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, .15);
+  }
+
+  .theme-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: $text;
+    text-align: center;
+  }
+}
+
+/* Mini preview swatch inside each theme option */
+.settings-page .theme-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 8px;
+  height: 72px;
+  border-radius: 6px;
+  border: 1px solid $border;
+  overflow: hidden;
+  position: relative;
+
+  .theme-preview-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 14px;
+  }
+
+  .theme-preview-line {
+    height: 6px;
+    border-radius: 3px;
+    width: 70%;
+
+    &.short { width: 45%; }
+  }
+}
+
+.settings-page .theme-preview-light {
+  background: #f4f6fb;
+
+  .theme-preview-bar  { background: #e1e5f0; }
+  .theme-preview-line { background: #c9cfdd; }
+}
+
+.settings-page .theme-preview-dark {
+  background: #0f1117;
+
+  .theme-preview-bar  { background: #2e303a; }
+  .theme-preview-line { background: #4b4f5c; }
+}
+
+/* ============================================================
+   Email verification card
+   ============================================================ */
+
+.settings-page .verify-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.settings-page .verify-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: $text;
+  min-width: 0;
+  flex: 1 1 auto;
+
+  .verify-email {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex: 0 0 10px;
+
+    &.ok   { background: $low;    box-shadow: 0 0 0 4px rgba($low, .15); }
+    &.warn { background: $medium; box-shadow: 0 0 0 4px rgba($medium, .18); }
+  }
+}
+
+.settings-page .verify-btn {
+  @include btn-primary;
+  padding: 9px 16px;
+  font-size: 13px;
+  border-radius: $radius-sm;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+  }
+}
+
+.settings-page .verify-msg {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: $muted;
+  line-height: 1.4;
+}
