@@ -25,17 +25,26 @@ export default function Login() {
         <h1>Sign in</h1>
         {error && <p className="error">{error}</p>}
         <input
-          type="email" placeholder="Email" required
+          type="email"
+          placeholder="Email"
+          required
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
         <input
-          type="password" placeholder="Password" required
+          type="password"
+          placeholder="Password"
+          required
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
         <button type="submit">Login</button>
-        <p>No account? <Link to="/register">Register</Link></p>
+        <p>
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
+        <p>
+          No account? <Link to="/register">Register</Link>
+        </p>
       </form>
     </div>
   );

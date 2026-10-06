@@ -11,6 +11,7 @@
 @use 'components/day-column';
 @use 'components/modal';
 @use 'components/timezone-select';
+@use 'components/verification';
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }

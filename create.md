@@ -14,7 +14,31 @@ cd frontend
 npm install
 npm install axios react-router-dom @dnd-kit/core @dnd-kit/sortable sass
 ```
+# Desktop
+## setup Tauri
+```bash
+npm run build
+npm install --save-dev @tauri-apps/cli
+npx tauri init
 
+```
+## important values are:
+```
+Frontend dev URL:
+http://localhost:3000
+
+Frontend build directory:
+../build
+```
+## then
+```bash
+npm run tauri dev
+```
+## for production version 
+```bash
+npm run build
+npm run tauri build
+```
 # Project structure
 ```
 src/
@@ -53,3 +77,4 @@ php artisan serve
 cd frontend
 npm run dev
 ```
+

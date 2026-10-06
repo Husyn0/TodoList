@@ -1,0 +1,87 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.verify-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: $radius-sm;
+  background: rgba($medium, .12);
+  border: 1px solid rgba($medium, .3);
+  color: $text;
+  font-size: 14px;
+  margin-bottom: 20px;
+
+  .verify-text { flex: 1; }
+
+  .verify-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .verify-msg {
+    font-size: 13px;
+    color: $muted;
+  }
+
+  .verify-btn {
+    @include btn-primary;
+    padding: 6px 12px;
+    font-size: 13px;
+    background: $medium;
+    border-color: $medium;
+
+    &:hover:not(:disabled) {
+      background: darken($medium, 8%);
+    }
+  }
+
+  .verify-dismiss {
+    background: none;
+    border: none;
+    font-size: 20px;
+    line-height: 1;
+    color: $muted;
+    cursor: pointer;
+    padding: 0 4px;
+
+    &:hover { color: $text; }
+  }
+}
+
+.verify-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  .verify-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: $text;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex: 0 0 10px;
+
+      &.ok   { background: $low; }
+      &.warn { background: $medium; }
+    }
+  }
+}
+
+.verify-msg {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: $muted;
+}

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { settingsApi } from '../api';
+import { settingsApi, authApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import TimezoneSelect from '../components/TimezoneSelect';
 import { detectTimezone } from '../constants/timezones';
 
 export default function Settings() {
-  const { setUser } = useAuth();
+  const { user, emailVerified, setUser } = useAuth();
   const [form, setForm] = useState({
     name: '',
     theme: 'light',
@@ -21,6 +21,8 @@ export default function Settings() {
   const [msgType, setMsgType] = useState('success');
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPwd, setSavingPwd] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [verifyMsg, setVerifyMsg] = useState('');
 
   useEffect(() => {
     settingsApi.getSettings().then(setForm);
@@ -65,6 +67,22 @@ export default function Settings() {
     }
   };
 
+  const resendVerification = async () => {
+    setResending(true);
+    setVerifyMsg('');
+    try {
+      const res = await authApi.resendVerification();
+      setVerifyMsg(res?.message || 'Verification link sent. Check your inbox.');
+    } catch (err) {
+      const errors = err.response?.data?.errors;
+      setVerifyMsg(
+        errors ? Object.values(errors)[0][0] : 'Could not send email.'
+      );
+    } finally {
+      setResending(false);
+    }
+  };
+
   return (
     <div className="settings-page">
       <header className="settings-header">
@@ -77,6 +95,38 @@ export default function Settings() {
       {msg && <div className={`toast ${msgType}`}>{msg}</div>}
 
       <div className="settings-grid">
+        {/* ---------- Email verification ---------- */}
+        <section className="settings-card">
+          <div className="card-head">
+            <h2>Email verification</h2>
+            <p className="muted">
+              {emailVerified
+                ? 'Your email address is confirmed.'
+                : 'Confirm your email to secure your account.'}
+            </p>
+          </div>
+
+          <div className="verify-row">
+            <span className="verify-status">
+              <span className={`dot ${emailVerified ? 'ok' : 'warn'}`} />
+              {user?.email}
+            </span>
+
+            {!emailVerified && (
+              <button
+                type="button"
+                className="btn primary"
+                onClick={resendVerification}
+                disabled={resending}
+              >
+                {resending ? 'Sending…' : 'Resend verification'}
+              </button>
+            )}
+          </div>
+
+          {verifyMsg && <p className="verify-msg">{verifyMsg}</p>}
+        </section>
+
         {/* ---------- Profile ---------- */}
         <section className="settings-card">
           <div className="card-head">

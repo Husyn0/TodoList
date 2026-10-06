@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import VerificationBanner from './VerificationBanner';
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -18,6 +19,7 @@ export default function Layout() {
         </div>
       </aside>
       <main className="main-content">
+        <VerificationBanner />
         <Outlet />
       </main>
     </div>

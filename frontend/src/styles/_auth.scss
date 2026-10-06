@@ -45,4 +45,23 @@
     font-size: 14px;
     margin: 0;
   }
+  
+  .muted {
+    color: $muted;
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    color: $primary;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  strong { color: $text; }
+  
 }
