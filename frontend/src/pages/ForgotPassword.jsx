@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { authApi } from '../api';
+import AuthShell from '../components/AuthShell';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -25,55 +26,57 @@ export default function ForgotPassword() {
 
   if (sent) {
     return (
-      <div className="auth-page">
+      <AuthShell>
         <div className="auth-card">
           <h1>Check your inbox</h1>
-          <p>
-            If <strong>{email}</strong> is registered, we’ve sent a password
-            reset link. It expires in 60 minutes.
+          <p className="auth-sub-inline">
+            If <strong>{email}</strong> is registered, we’ve sent a reset link.
+            It expires in 60 minutes.
           </p>
-          <p>
-            Didn’t get it? Check spam, or{' '}
-            <button
-              type="button"
-              className="link-btn"
-              onClick={() => setSent(false)}
-            >
-              try another email
-            </button>
-            .
-          </p>
-          <p>
+          <button
+            type="button"
+            className="auth-submit auth-submit-ghost"
+            onClick={() => setSent(false)}
+          >
+            Try another email
+          </button>
+          <p className="auth-meta">
             <Link to="/login">← Back to sign in</Link>
           </p>
         </div>
-      </div>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="auth-page">
+    <AuthShell>
       <form className="auth-card" onSubmit={submit}>
         <h1>Forgot password</h1>
-        <p className="muted">
+        <p className="auth-sub-inline">
           Enter your account email and we’ll send you a reset link.
         </p>
         {error && <p className="error">{error}</p>}
-        <input
-          type="email"
-          placeholder="Email"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <button type="submit" disabled={loading}>
+
+        <label className="auth-field">
+          <span>Email</span>
+          <input
+            type="email"
+            placeholder="you@example.com"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </label>
+
+        <button type="submit" className="auth-submit" disabled={loading}>
           {loading ? 'Sending…' : 'Send reset link'}
         </button>
-        <p>
+
+        <p className="auth-meta">
           Remembered it? <Link to="/login">Sign in</Link>
         </p>
       </form>
-    </div>
+    </AuthShell>
   );
 }

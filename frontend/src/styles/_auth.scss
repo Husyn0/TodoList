@@ -1,67 +1,292 @@
 @use 'variables' as *;
 @use 'mixins' as *;
 
-.auth-page {
-  min-height: 100vh;
+/* ============================================================
+   Auth shell — split panel layout
+   ============================================================ */
+
+.auth-shell {
   display: grid;
-  place-items: center;
+  grid-template-columns: 1.15fr 1fr;
+  min-height: 100vh;
   background: $bg;
-  padding: 20px;
-  transition: background .15s;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
 }
 
-.auth-card {
-  @include card(40px);
-  width: 100%;
-  max-width: 420px;
+/* ---------- Left: brand panel ---------- */
+.auth-brand {
+  position: relative;
+  overflow: hidden;
+  padding: 64px 56px;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, #4a6cf7 0%, #7c3aed 100%);
+  isolation: isolate;
+
+  @media (max-width: 900px) {
+    padding: 40px 32px;
+    min-height: 240px;
+  }
+}
+
+[data-theme='dark'] .auth-brand {
+  background: linear-gradient(135deg, #2a3a99 0%, #4a1d99 100%);
+}
+
+/* Decorative background (SVG + orbs) */
+.auth-brand-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    opacity: .8;
+  }
+}
+
+.auth-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: .45;
+  animation: auth-float 14s ease-in-out infinite;
+}
+
+.auth-orb-1 {
+  width: 260px; height: 260px;
+  background: #a78bfa;
+  top: -60px; left: -60px;
+  animation-delay: 0s;
+}
+.auth-orb-2 {
+  width: 320px; height: 320px;
+  background: #22d3ee;
+  bottom: -100px; right: -80px;
+  animation-delay: -4s;
+}
+.auth-orb-3 {
+  width: 180px; height: 180px;
+  background: #f472b6;
+  top: 40%; left: 45%;
+  animation-delay: -8s;
+}
+
+@keyframes auth-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(20px, -18px) scale(1.05); }
+  66%      { transform: translate(-14px, 12px) scale(.97); }
+}
+
+/* Brand content */
+.auth-brand-content {
+  position: relative;
+  max-width: 480px;
+}
+
+.auth-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 56px;
+
+  @media (max-width: 900px) {
+    margin-bottom: 24px;
+  }
+}
+
+.auth-logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .18);
+  font-size: 18px;
+  backdrop-filter: blur(6px);
+}
+
+.auth-logo-text { letter-spacing: -.2px; }
+
+.auth-hero {
+  font-size: 44px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -1.2px;
+  color: #fff;
+  margin: 0 0 18px;
+
+  @media (max-width: 900px) { font-size: 30px; }
+}
+
+.auth-sub {
+  font-size: 16px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, .82);
+  margin: 0 0 36px;
+
+  @media (max-width: 900px) {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+}
+
+.auth-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   gap: 14px;
 
-  h1 { margin: 0 0 8px; }
-
-  input {
-    @include input-plain;
-    padding: 12px 14px;
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, .92);
   }
 
-  button {
-    @include btn-primary;
-    padding: 12px;
-    border-radius: $radius-sm;
+  @media (max-width: 900px) { display: none; }
+}
+
+.auth-feature-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  flex: 0 0 8px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, .2);
+}
+
+/* ---------- Right: form panel ---------- */
+.auth-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  background: $bg;
+
+  @media (max-width: 900px) {
+    padding: 32px 20px 48px;
+  }
+}
+
+.auth-form-inner {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* ---------- Card (form body) ---------- */
+.auth-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+
+  h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -.6px;
+    color: $text;
+    line-height: 1.15;
   }
 
-  p {
-    text-align: center;
+  .auth-sub-inline {
+    margin: -6px 0 6px;
     color: $muted;
     font-size: 14px;
-    margin: 8px 0 0;
   }
-
-  a { color: $primary; text-decoration: none; }
 
   .error {
     color: $danger;
-    font-size: 14px;
+    font-size: 13px;
     margin: 0;
-  }
-  
-  .muted {
-    color: $muted;
-    font-size: 14px;
-    margin: 0;
+    padding: 10px 12px;
+    background: rgba($danger, .08);
+    border: 1px solid rgba($danger, .25);
+    border-radius: $radius-sm;
   }
 
-  .link-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    color: $primary;
-    font: inherit;
-    cursor: pointer;
-    text-decoration: underline;
+  .auth-meta {
+    margin: 0;
+    text-align: center;
+    font-size: 13px;
+    color: $muted;
+
+    a {
+      color: $primary;
+      text-decoration: none;
+      font-weight: 600;
+
+      &:hover { text-decoration: underline; }
+    }
   }
 
   strong { color: $text; }
-  
+}
+
+/* ---------- Fields ---------- */
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  > span {
+    font-size: 12px;
+    font-weight: 600;
+    color: $muted;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+
+  input {
+    @include input-base;
+    padding: 12px 14px;
+    font-size: 15px;
+    background: $surface;
+    color: $text;
+
+    &::placeholder { color: $muted; opacity: .65; }
+  }
+}
+
+/* ---------- Submit button ---------- */
+.auth-submit {
+  @include btn-primary;
+  margin-top: 6px;
+  padding: 13px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: $radius-sm;
+  width: 100%;
+}
+
+.auth-submit-ghost {
+  background: transparent;
+  color: $primary;
+  border: 1px solid $border;
+
+  &:hover:not(:disabled) {
+    background: rgba($primary, .08);
+    color: $primary;
+  }
+}
+
+/* ---------- Small screens: tighten spacings ---------- */
+@media (max-width: 900px) {
+  .auth-card h1 { font-size: 24px; }
 }

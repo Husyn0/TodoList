@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '../api';
+import AuthShell from '../components/AuthShell';
 
 export default function ResetPassword() {
   const [params] = useSearchParams();
@@ -20,17 +21,17 @@ export default function ResetPassword() {
 
   if (!token) {
     return (
-      <div className="auth-page">
+      <AuthShell>
         <div className="auth-card">
           <h1>Invalid link</h1>
           <p className="error">
-            This password reset link is missing its token. Request a new one.
+            This password reset link is missing its token.
           </p>
-          <p>
-            <Link to="/forgot-password">Request new link</Link>
+          <p className="auth-meta">
+            <Link to="/forgot-password">Request a new link</Link>
           </p>
         </div>
-      </div>
+      </AuthShell>
     );
   }
 
@@ -64,58 +65,71 @@ export default function ResetPassword() {
 
   if (done) {
     return (
-      <div className="auth-page">
+      <AuthShell>
         <div className="auth-card">
-          <h1>Password updated</h1>
-          <p>Redirecting you to sign in…</p>
-          <p>
+          <h1>Password updated ✅</h1>
+          <p className="auth-sub-inline">Redirecting you to sign in…</p>
+          <p className="auth-meta">
             <Link to="/login">Sign in now</Link>
           </p>
         </div>
-      </div>
+      </AuthShell>
     );
   }
 
   return (
-    <div className="auth-page">
+    <AuthShell>
       <form className="auth-card" onSubmit={submit}>
         <h1>Reset password</h1>
-        <p className="muted">Choose a new password for your account.</p>
+        <p className="auth-sub-inline">Choose a new password for your account.</p>
         {error && <p className="error">{error}</p>}
 
-        <input
-          type="email"
-          placeholder="Email"
-          required
-          autoComplete="email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <input
-          type="password"
-          placeholder="New password"
-          required
-          autoComplete="new-password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
-        <input
-          type="password"
-          placeholder="Confirm new password"
-          required
-          autoComplete="new-password"
-          value={form.password_confirmation}
-          onChange={(e) =>
-            setForm({ ...form, password_confirmation: e.target.value })
-          }
-        />
-        <button type="submit" disabled={loading}>
+        <label className="auth-field">
+          <span>Email</span>
+          <input
+            type="email"
+            placeholder="you@example.com"
+            required
+            autoComplete="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+        </label>
+
+        <label className="auth-field">
+          <span>New password</span>
+          <input
+            type="password"
+            placeholder="At least 8 characters"
+            required
+            autoComplete="new-password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+          />
+        </label>
+
+        <label className="auth-field">
+          <span>Confirm new password</span>
+          <input
+            type="password"
+            placeholder="Repeat new password"
+            required
+            autoComplete="new-password"
+            value={form.password_confirmation}
+            onChange={(e) =>
+              setForm({ ...form, password_confirmation: e.target.value })
+            }
+          />
+        </label>
+
+        <button type="submit" className="auth-submit" disabled={loading}>
           {loading ? 'Updating…' : 'Reset password'}
         </button>
-        <p>
+
+        <p className="auth-meta">
           <Link to="/login">← Back to sign in</Link>
         </p>
       </form>
-    </div>
+    </AuthShell>
   );
 }
