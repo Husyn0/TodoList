@@ -24,7 +24,7 @@ const startOfWeek = (date, weekStart = 'monday') => {
 
 const fmt = (d) => d.toISOString().split('T')[0];
 
-const CONTRIB_MONTHS = 13;
+const CONTRIB_MONTHS = 12;
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -51,9 +51,13 @@ export default function Dashboard() {
 
   // ~1 year back → contribution chart
   useEffect(() => {
+    const to = new Date();
+    const from = new Date();
+    from.setMonth(from.getMonth() - CONTRIB_MONTHS);
+
     let cancelled = false;
     tasksApi
-      .getTasksRange(CONTRIB_MONTHS)
+      .getTasksRange(fmt(from), fmt(to))
       .then((tasks) => {
         if (!cancelled) setRangeTasks(tasks);
       })

@@ -1,11 +1,11 @@
 import api from './client';
 
 /**
- * Get all tracks for the authenticated user.
- * Returns a map keyed by `${taskId}__${dateKey}` for O(1) lookup in the UI.
+ * Get tracks for a date range.
+ * Backend requires ?from=YYYY-MM-DD&to=YYYY-MM-DD.
  */
-export const getTracks = () =>
-  api.get('/tracks').then((r) => {
+export const getTracks = (from, to) =>
+  api.get('/tracks', { params: { from, to } }).then((r) => {
     const map = {};
     for (const tr of r.data) {
       const dateKey = tr.date ? String(tr.date).split('T')[0] : tr.date;

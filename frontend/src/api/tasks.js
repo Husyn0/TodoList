@@ -6,9 +6,9 @@ export const getTasksForWeek = (weekStart) =>
     .get('/tasks', { params: { week_start: weekStart } })
     .then((r) => r.data.map(normalizeTask));
 
-export const getTasksRange = (months = 13) =>
+export const getTasksRange = (from, to) =>
   api
-    .get('/tasks/range', { params: { months } })
+    .get('/tasks/range', { params: { from, to } })
     .then((r) => r.data.map(normalizeTask));
 
 export const createTask = (payload) =>

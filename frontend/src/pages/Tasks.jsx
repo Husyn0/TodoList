@@ -52,8 +52,10 @@ export default function Tasks() {
   );
 
   const load = useCallback(() => {
-    tasksApi.getTasksForWeek(fmt(weekStart)).then(setTasks);
-    tracksApi.getTracks().then(setTracks);
+    const from = fmt(weekStart);
+    const to = fmt(new Date(weekStart.getTime() + 6 * 86400000));
+    tasksApi.getTasksForWeek(from).then(setTasks);
+    tracksApi.getTracks(from, to).then(setTracks);
   }, [weekStart]);
 
   useEffect(() => {
