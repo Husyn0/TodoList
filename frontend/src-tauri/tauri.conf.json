@@ -15,6 +15,7 @@
         "title": "TodoList",
         "width": 800,
         "height": 600,
+        "devtools":true,
         "resizable": true,
         "fullscreen": false
       }

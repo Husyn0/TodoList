@@ -3,17 +3,16 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "oxlint",
-    "preview": "vite preview",
-    "start": "npm run dev",
-    "tauri": "tauri",
-    "tauri:dev": "cross-env --unset GTK_EXE_PREFIX --unset GTK_PATH --unset LOCPATH --unset GSETTINGS_SCHEMA_DIR --unset GIO_MODULE_DIR --unset GTK_IM_MODULE_FILE --unset XDG_DATA_DIRS --unset GDK_BACKEND tauri dev",
-    "tauri:build": "cross-env --unset GTK_EXE_PREFIX --unset GTK_PATH --unset LOCPATH --unset GSETTINGS_SCHEMA_DIR --unset GIO_MODULE_DIR --unset GTK_IM_MODULE_FILE --unset XDG_DATA_DIRS --unset GDK_BACKEND tauri build"
-
-  },
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "lint": "oxlint",
+  "preview": "vite preview",
+  "start": "npm run dev",
+  "tauri": "tauri",
+  "tauri:dev": "env -u GTK_PATH -u GIO_MODULE_DIR -u GTK_EXE_PREFIX -u LOCPATH -u GSETTINGS_SCHEMA_DIR -u GTK_IM_MODULE_FILE -u XDG_DATA_DIRS -u GDK_BACKEND tauri dev",
+  "tauri:build": "env -u GTK_PATH -u GIO_MODULE_DIR -u GTK_EXE_PREFIX -u LOCPATH -u GSETTINGS_SCHEMA_DIR -u GTK_IM_MODULE_FILE -u XDG_DATA_DIRS -u GDK_BACKEND tauri build"
+},
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
@@ -31,7 +30,6 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
-    "cross-env": "^10.1.0",
     "oxlint": "^1.81.0",
     "vite": "^8.3.0"
   }
