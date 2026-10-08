@@ -11,8 +11,7 @@ class VerifyEmailNotification extends BaseVerifyEmail
 {
     protected function buildVerifyUrl($notifiable): string
     {
-        // Signed URL pointing at our API route, valid for 60 minutes.
-        $apiUrl = URL::temporarySignedRoute(
+        return URL::temporarySignedRoute(
             'verification.verify',
             Carbon::now()->addMinutes(60),
             [
@@ -20,14 +19,6 @@ class VerifyEmailNotification extends BaseVerifyEmail
                 'hash' => sha1($notifiable->getEmailForVerification()),
             ]
         );
-
-        // Repackage as frontend URL: keep signature + expires as query params.
-        $frontend = rtrim(config('services.frontend.url'), '/')
-                  . config('services.frontend.verify_path');
-
-        $query = parse_url($apiUrl, PHP_URL_QUERY);
-
-        return $frontend . '?' . $query;
     }
 
     public function toMail($notifiable): MailMessage
