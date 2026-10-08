@@ -13,8 +13,8 @@ Every id/token is captured into a shell variable. **Do not copy ids manually.**
 ## 0. Session setup
 
 ```bash
-DEV_EMAIL="debugdevtest0@gmail.com"
-DEV_PASSWORD="password123"
+EMAIL="debugdevtest0@gmail.com"
+PASSWORD="password12345"
 
 php artisan config:clear > /dev/null
 echo "From: $(php artisan tinker --execute="echo config('mail.from.address');" | tail -n 1)"
