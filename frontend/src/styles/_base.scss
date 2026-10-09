@@ -1,0 +1,26 @@
+@use 'variables' as *;
+
+* { box-sizing: border-box; }
+
+html,
+body,
+#root { height: 100%; margin: 0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: $bg;
+  color: $text;
+  transition: background $transition, color $transition;
+}
+
+button {
+  cursor: pointer;
+  font: inherit;
+}
+
+.loading {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  color: $muted;
+}

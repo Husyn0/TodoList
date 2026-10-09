@@ -2,7 +2,7 @@
 @use 'mixins' as *;
 
 /* ============================================================
-   Dashboard page
+   Dashboard page shell
    ============================================================ */
 .dashboard-page {
   display: flex;
@@ -55,19 +55,15 @@
 }
 
 /* ============================================================
-   KPI cards
+   KPI row — 4 / 2 / 1 responsive
    ============================================================ */
 .dashboard-page .kpi-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 
-  @media (max-width: 1100px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
+  @media (max-width: 1100px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 640px)  { grid-template-columns: 1fr; }
 }
 
 .dashboard-page .kpi-card {
@@ -105,10 +101,7 @@
 }
 
 /* ============================================================
-   Chart grid — named areas
-   - Desktop (≥1101px): 4 columns
-   - Tablet  (641–1100px): 2 columns
-   - Mobile  (≤640px): 1 column
+   Chart grid — named areas, 3 responsive layouts
    ============================================================ */
 .dashboard-page .dashboard-grid {
   display: grid;
@@ -135,16 +128,11 @@
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
     grid-template-areas:
-      "radar"
-      "trend"
-      "donut"
-      "bars"
-      "streak"
-      "contrib"
-      "upcoming";
+      "radar" "trend" "donut" "bars" "streak" "contrib" "upcoming";
   }
 }
 
+// named cells
 .dashboard-page .grid-radar    { grid-area: radar;    min-width: 0; }
 .dashboard-page .grid-trend    { grid-area: trend;    min-width: 0; }
 .dashboard-page .grid-donut    { grid-area: donut;    min-width: 0; }
@@ -153,20 +141,11 @@
 .dashboard-page .grid-contrib  { grid-area: contrib;  min-width: 0; }
 .dashboard-page .grid-upcoming { grid-area: upcoming; min-width: 0; }
 
-/* Cells stretch their content to full height so rows align. */
-.dashboard-page .grid-radar > *,
-.dashboard-page .grid-trend > *,
-.dashboard-page .grid-donut > *,
-.dashboard-page .grid-bars > *,
-.dashboard-page .grid-streak > *,
-.dashboard-page .grid-contrib > *,
-.dashboard-page .grid-upcoming > * {
-  height: 100%;
-}
+// every cell stretches its child to full height
+.dashboard-page .dashboard-grid > [class^='grid-'] > * { height: 100%; }
 
 /* ============================================================
-   Chart card chrome (used by trend, donut, bars, streak, upcoming)
-   The radar and contribution chart intentionally have no chrome.
+   Chart card (used by trend, donut, bars, streak, upcoming)
    ============================================================ */
 .dashboard-page .chart-card {
   @include card-flex(12px, 18px);
@@ -178,17 +157,8 @@
     flex-direction: column;
     gap: 2px;
 
-    h2 {
-      margin: 0;
-      font-size: 16px;
-      color: $text;
-    }
-
-    .muted {
-      margin: 0;
-      font-size: 12px;
-      color: $muted;
-    }
+    h2 { margin: 0; font-size: 16px; color: $text; }
+    .muted { margin: 0; font-size: 12px; color: $muted; }
   }
 
   .chart-link {
@@ -216,7 +186,7 @@
 }
 
 /* ============================================================
-   Streaks card body
+   Streaks
    ============================================================ */
 .dashboard-page .streak-grid {
   display: flex;
@@ -302,22 +272,15 @@
     text-overflow: ellipsis;
   }
 
-  .upcoming-period {
-    font-size: 14px;
-    line-height: 1;
-  }
+  .upcoming-period { font-size: 14px; line-height: 1; }
 
+  // local priority chip (kept independent of task-card scope)
   .priority-letter {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    @include chip;
     width: 20px;
     height: 20px;
     border-radius: 6px;
     font-size: 11px;
-    font-weight: 700;
-    line-height: 1;
-    flex: 0 0 auto;
 
     &.low    { @include priority-color($low); }
     &.medium { @include priority-color($medium); }
@@ -326,7 +289,7 @@
 }
 
 /* ============================================================
-   Radar chart (bare — no card chrome)
+   Radar cell — bare, no card chrome
    ============================================================ */
 .dashboard-page .radar-chart {
   min-width: 0;
@@ -336,7 +299,7 @@
 }
 
 /* ============================================================
-   Contribution chart (bare — no card chrome)
+   Contribution heatmap — bare, no card chrome
    ============================================================ */
 .contrib-chart {
   display: flex;
@@ -365,10 +328,7 @@
     span:last-child { padding: 0 2px; }
   }
 
-  .contrib-scroll {
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
+  .contrib-scroll { overflow-x: auto; padding-bottom: 4px; }
 
   .contrib-grid {
     display: flex;
@@ -404,16 +364,10 @@
     color: $muted;
     user-select: none;
 
-    .contrib-month-label {
-      grid-row: 1;
-      white-space: nowrap;
-    }
+    .contrib-month-label { grid-row: 1; white-space: nowrap; }
   }
 
-  .contrib-cols {
-    display: flex;
-    gap: 2px;
-  }
+  .contrib-cols { display: flex; gap: 2px; }
 
   .contrib-col {
     display: grid;
@@ -446,16 +400,14 @@
   }
 }
 
-[data-theme='dark'] .contrib-chart {
-  .contrib-square {
-    background: #1c1f28;
-    &.level-0     { background: #1c1f28; }
-    &.level-1     { background: #0e4429; }
-    &.level-2     { background: #006d32; }
-    &.level-3     { background: #26a641; }
-    &.level-4     { background: #39d353; }
-    &.level-empty { background: transparent; }
-  }
+[data-theme='dark'] .contrib-chart .contrib-square {
+  background: #1c1f28;
+  &.level-0     { background: #1c1f28; }
+  &.level-1     { background: #0e4429; }
+  &.level-2     { background: #006d32; }
+  &.level-3     { background: #26a641; }
+  &.level-4     { background: #39d353; }
+  &.level-empty { background: transparent; }
 }
 
 /* ============================================================

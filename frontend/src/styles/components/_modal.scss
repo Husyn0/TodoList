@@ -35,7 +35,7 @@
 
   input,
   textarea,
-  select { @include input-plain; }
+  select { @include input-base; }
 
   textarea {
     resize: vertical;
@@ -59,20 +59,12 @@
     font-size: 12px;
     border-radius: $radius-pill;
     border: 1px solid $border;
-    background: white;
+    background: $surface;
     color: $muted;
     transition: $transition;
 
-    &:hover {
-      border-color: $primary;
-      color: $primary;
-    }
-
-    &.active {
-      background: $primary;
-      border-color: $primary;
-      color: white;
-    }
+    &:hover { border-color: $primary; color: $primary; }
+    &.active { background: $primary; border-color: $primary; color: white; }
   }
 
   .modal-actions {

@@ -1,6 +1,8 @@
 @use 'variables' as *;
 
-// ---------- surface / card ----------
+// ============================================================
+//  Surfaces
+// ============================================================
 @mixin card($padding: 24px) {
   background: $surface;
   border: 1px solid $border;
@@ -16,7 +18,9 @@
   gap: $gap;
 }
 
-// ---------- inputs ----------
+// ============================================================
+//  Inputs
+// ============================================================
 @mixin input-base {
   padding: 11px 13px;
   border: 1px solid $border;
@@ -48,14 +52,9 @@
   }
 }
 
-// ---------- buttons ----------
-@mixin btn-reset {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font: inherit;
-}
-
+// ============================================================
+//  Buttons
+// ============================================================
 @mixin btn-primary {
   padding: 10px 20px;
   border-radius: $radius-sm;
@@ -74,17 +73,11 @@
   padding: 10px 18px;
   border-radius: $radius-sm;
   border: 1px solid $border;
-  background: white;
+  background: $surface;
   color: $text;
   transition: $transition;
 
   &:hover { background: $bg; }
-}
-
-// ---------- misc ----------
-@mixin muted-text($size: 14px) {
-  color: $muted;
-  font-size: $size;
 }
 
 @mixin icon-btn {
@@ -98,19 +91,9 @@
   &:hover { color: $text; }
 }
 
-@mixin focus-ring {
-  &:focus-visible {
-    outline: 2px solid $primary;
-    outline-offset: 2px;
-  }
-}
-
-// ---------- priority color helper ----------
-@mixin priority-color($color) {
-  background: rgba($color, .15);
-  color: $color;
-}
-/* _mixins.scss */
+// ============================================================
+//  Segmented toggle (used by: view toggle, future toggles)
+// ============================================================
 @mixin segmented {
   display: inline-flex;
   border: 1px solid $border;
@@ -131,4 +114,33 @@
     &:hover:not(.active) { color: $text; background: $bg; }
     &.active { background: $primary; color: #fff; }
   }
+}
+
+// ============================================================
+//  Typography
+// ============================================================
+@mixin muted-text($size: 14px) {
+  color: $muted;
+  font-size: $size;
+}
+
+// ============================================================
+//  Priority chip palette
+//  Used by: task-card, upcoming-list, month chips (via status colors)
+// ============================================================
+@mixin priority-color($color) {
+  background: rgba($color, .15);
+  color: $color;
+}
+
+// ============================================================
+//  Small inline chip (priority letter, month chip, etc.)
+// ============================================================
+@mixin chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  line-height: 1;
+  flex: 0 0 auto;
 }

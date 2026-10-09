@@ -1,10 +1,27 @@
-@use 'theme';       // ← first, so variables exist before use
+// -----------------------------------------------------------------
+// Order matters:
+//   1. theme      — emits :root / [data-theme] CSS variables
+//   2. variables  — SCSS tokens (some reference the CSS vars above)
+//   3. mixins     — reusable building blocks
+//   4. base       — reset + typography
+//   5. pages      — page-level partials
+//   6. components — reusable UI partials
+// -----------------------------------------------------------------
+
+@use 'theme';
 @use 'variables' as *;
 @use 'mixins' as *;
+
+// ---------- base ----------
+@use 'base';
+
+// ---------- pages ----------
 @use 'auth';
 @use 'tasks';
 @use 'dashboard';
 @use 'settings';
+
+// ---------- components ----------
 @use 'components/layout';
 @use 'components/toast';
 @use 'components/task-card';
@@ -12,22 +29,3 @@
 @use 'components/modal';
 @use 'components/timezone-select';
 @use 'components/verification';
-
-* { box-sizing: border-box; }
-html, body, #root { height: 100%; margin: 0; }
-
-body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: $bg;
-  color: $text;
-  transition: background .15s, color .15s;
-}
-
-button { cursor: pointer; font: inherit; }
-
-.loading {
-  display: grid;
-  place-items: center;
-  height: 100vh;
-  color: $muted;
-}

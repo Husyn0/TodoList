@@ -1,111 +1,109 @@
 @use 'variables' as *;
 @use 'mixins' as *;
 
+/* ============================================================
+   Settings page shell
+   ============================================================ */
 .settings-page {
   display: flex;
   flex-direction: column;
   gap: 24px;
   max-width: 960px;
+}
 
-  .settings-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 16px;
+/* ---------- Header ---------- */
+.settings-page .settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
 
-    h1 { margin: 0 0 4px; }
-    .muted { @include muted-text; margin: 0; }
-  }
+  h1 { margin: 0 0 4px; }
+  .muted { @include muted-text; margin: 0; }
+}
 
-  .settings-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+/* ---------- Grid ---------- */
+.settings-page .settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 
-    @media (max-width: 820px) {
-      grid-template-columns: 1fr;
-    }
-  }
+  @media (max-width: 820px) { grid-template-columns: 1fr; }
+}
 
-  .settings-card {
-    @include card-flex(18px);
+/* ---------- Card ---------- */
+.settings-page .settings-card {
+  @include card-flex(18px);
 
-    .card-head {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid $border;
-
-      h2 { margin: 0; font-size: 18px; color: $text; }
-      .muted { @include muted-text(13px); margin: 0; }
-    }
-  }
-
-  .settings-form {
+  .card-head {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 4px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid $border;
 
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-
-      @media (max-width: 520px) {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-
-      > span {
-        font-size: 12px;
-        font-weight: 600;
-        color: $muted;
-        text-transform: uppercase;
-        letter-spacing: .4px;
-      }
-
-      input,
-      select {
-        @include input-base;
-
-        &::placeholder {
-          color: $muted;
-          opacity: .6;
-        }
-      }
-
-      select { cursor: pointer; }
-    }
-  }
-
-  .card-actions {
-    display: flex;
-    justify-content: flex-end;
-    padding-top: 6px;
-    border-top: 1px solid $border;
-    margin-top: 4px;
-
-    .btn.primary { @include btn-primary; }
+    h2 { margin: 0; font-size: 18px; color: $text; }
+    .muted { @include muted-text(13px); margin: 0; }
   }
 }
-/* ============================================================
-   Appearance card — theme picker
-   ============================================================ */
 
+/* ---------- Form ---------- */
+.settings-page .settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+
+    @media (max-width: 520px) { grid-template-columns: 1fr; }
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    > span {
+      font-size: 12px;
+      font-weight: 600;
+      color: $muted;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    input,
+    select {
+      @include input-base;
+
+      &::placeholder { color: $muted; opacity: .6; }
+    }
+
+    select { cursor: pointer; }
+  }
+}
+
+.settings-page .card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 6px;
+  border-top: 1px solid $border;
+  margin-top: 4px;
+
+  button { @include btn-primary; }
+}
+
+/* ============================================================
+   Appearance — theme picker
+   ============================================================ */
 .settings-page .theme-picker {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 
-  @media (max-width: 520px) {
-    grid-template-columns: 1fr;
-  }
+  @media (max-width: 520px) { grid-template-columns: 1fr; }
 }
 
 .settings-page .theme-option {
@@ -119,19 +117,9 @@
   cursor: pointer;
   transition: border-color .15s, box-shadow .15s, transform .1s;
 
-  &:hover:not(:disabled) {
-    border-color: rgba($primary, .5);
-  }
-
-  &:disabled {
-    opacity: .7;
-    cursor: wait;
-  }
-
-  &.active {
-    border-color: $primary;
-    box-shadow: 0 0 0 3px rgba($primary, .15);
-  }
+  &:hover:not(:disabled) { border-color: rgba($primary, .5); }
+  &:disabled             { opacity: .7; cursor: wait; }
+  &.active               { border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, .15); }
 
   .theme-label {
     font-size: 13px;
@@ -141,7 +129,6 @@
   }
 }
 
-/* Mini preview swatch inside each theme option */
 .settings-page .theme-preview {
   display: flex;
   flex-direction: column;
@@ -173,14 +160,12 @@
 
 .settings-page .theme-preview-light {
   background: #f4f6fb;
-
   .theme-preview-bar  { background: #e1e5f0; }
   .theme-preview-line { background: #c9cfdd; }
 }
 
 .settings-page .theme-preview-dark {
   background: #0f1117;
-
   .theme-preview-bar  { background: #2e303a; }
   .theme-preview-line { background: #4b4f5c; }
 }
@@ -188,7 +173,6 @@
 /* ============================================================
    Email verification card
    ============================================================ */
-
 .settings-page .verify-row {
   display: flex;
   align-items: center;
@@ -231,10 +215,7 @@
   border-radius: $radius-sm;
   white-space: nowrap;
 
-  &:disabled {
-    opacity: .6;
-    cursor: not-allowed;
-  }
+  &:disabled { opacity: .6; cursor: not-allowed; }
 }
 
 .settings-page .verify-msg {

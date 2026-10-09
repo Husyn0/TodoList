@@ -2,9 +2,8 @@
 @use 'mixins' as *;
 
 /* ============================================================
-   Tasks page — header, view toggle, timeframe chart, board, month list
+   Tasks page — layout shell
    ============================================================ */
-
 .tasks-page {
   display: flex;
   flex-direction: column;
@@ -12,7 +11,9 @@
   height: 100%;
 }
 
-/* ---------- Header ---------- */
+/* ============================================================
+   Header: title + view toggle + week nav
+   ============================================================ */
 .tasks-header {
   display: flex;
   justify-content: space-between;
@@ -29,35 +30,8 @@
   gap: 16px;
 }
 
-/* ---------- Week / Month toggle ---------- */
-.view-toggle {
-  display: inline-flex;
-  border: 1px solid $border;
-  border-radius: $radius-sm;
-  overflow: hidden;
-  background: $surface;
+.view-toggle { @include segmented; }
 
-  button {
-    border: 0;
-    background: transparent;
-    color: $muted;
-    padding: 6px 14px;
-    font-size: 13px;
-    font-weight: 600;
-    transition: $transition;
-
-    & + button { border-left: 1px solid $border; }
-
-    &:hover:not(.active) { color: $text; background: $bg; }
-
-    &.active {
-      background: $primary;
-      color: #fff;
-    }
-  }
-}
-
-/* ---------- Week nav (reused by both views) ---------- */
 .tasks-header .week-nav {
   display: flex;
   gap: 12px;
@@ -75,7 +49,6 @@
     &:hover { background: $bg; }
   }
 
-  /* the "Today" button is wider than the arrow buttons */
   .week-nav-today {
     width: auto;
     padding: 0 14px;
@@ -100,7 +73,7 @@
 }
 
 /* ============================================================
-   Time-frame chart (bar chart: tasks per day, stacked by status)
+   Time-frame chart card
    ============================================================ */
 .timeframe-chart {
   @include card-flex(14px, 20px);
@@ -115,14 +88,11 @@
     .muted { margin: 0; font-size: 13px; color: $muted; }
   }
 
-  /* recharts needs an explicit height on the container */
-  .recharts-responsive-container {
-    min-width: 0;
-  }
+  .recharts-responsive-container { min-width: 0; }
 }
 
 /* ============================================================
-   Week board (unchanged behavior, kept for parity)
+   Week board — flex columns (unchanged behavior)
    ============================================================ */
 .week-board {
   display: flex;
@@ -135,9 +105,8 @@
 
 /* ============================================================
    Month calendar
-   - 7 (or N) columns wide, one per active weekday
-   - one row per week in the month
-   - each cell is a calendar tile with day number + task chips
+   - N columns, one row per week of the month
+   - each cell = a calendar tile with day number + task chips
    ============================================================ */
 .month-calendar {
   display: flex;
@@ -146,7 +115,6 @@
   margin-top: 4px;
 }
 
-/* ---------- Weekday header row ---------- */
 .month-header {
   display: grid;
   grid-template-columns: repeat(var(--cols, 7), minmax(0, 1fr));
@@ -163,7 +131,6 @@
   text-align: center;
 }
 
-/* ---------- Week rows ---------- */
 .month-grid {
   display: flex;
   flex-direction: column;
@@ -176,7 +143,6 @@
   gap: 8px;
 }
 
-/* ---------- Day cell ---------- */
 .month-cell {
   display: flex;
   flex-direction: column;
@@ -215,7 +181,6 @@
   }
 }
 
-/* ---------- Head ---------- */
 .month-cell-head {
   display: flex;
   justify-content: flex-end;
@@ -234,7 +199,6 @@
   color: $text;
 }
 
-/* ---------- Body ---------- */
 .month-cell-body {
   flex: 1 1 auto;
   min-height: 0;
@@ -255,7 +219,6 @@
   &::-webkit-scrollbar-track { background: transparent; }
 }
 
-/* ---------- Task chips ---------- */
 .month-chip {
   border: 1px solid $border;
   background: $surface;
@@ -279,7 +242,6 @@
   &:hover { background: $bg; }
 }
 
-/* ---------- Footer: add button ---------- */
 .month-cell-add {
   flex: 0 0 auto;
   margin: 0;
@@ -304,54 +266,12 @@
   }
 }
 
-/* ---------- Responsive: fewer columns on smaller screens ---------- */
+/* ---------- responsive ---------- */
 @media (max-width: 900px) {
-  .month-header { display: none; }   /* weekday labels lose meaning when stacked */
-
-  .month-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .month-header { display: none; }
+  .month-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 520px) {
-  .month-row {
-    grid-template-columns: 1fr;
-  }
+  .month-row { grid-template-columns: 1fr; }
 }
-
-
-
-.month-row-date {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.1;
-  color: $muted;
-}
-
-.month-row-day {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-
-.month-row-num {
-  font-size: 18px;
-  font-weight: 700;
-  color: $text;
-}
-
-.month-row-tasks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  min-width: 0;
-}
-
-.month-row-empty {
-  font-size: 13px;
-  color: $muted;
-  opacity: .6;
-}
-
-.view-toggle { @include segmented; }
