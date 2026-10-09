@@ -122,8 +122,8 @@ export const shiftWeek = (key, offset) => {
 export const normalizeTask = (t) => ({
   ...t,
   due_date: t.due_date ? String(t.due_date).split('T')[0] : t.due_date,
-  meeting_time: (t.meeting_time || '').slice(0, 5),
-  period: t.period || null,                 // NEW
+  meeting_time: (t.meeting_time || '').slice(0, 5),   // "09:30:00" → "09:30"
+  period: t.period || null,
   repeat: {
     preset: t.repeat_preset ?? 'none',
     days: t.repeat_days ?? [],
@@ -132,13 +132,18 @@ export const normalizeTask = (t) => ({
 
 export const denormalizeTask = (form) => {
   const { repeat, meeting_time, period, ...rest } = form;
-  const mt = meeting_time
-    ? (meeting_time.length === 5 ? `${meeting_time}:00` : meeting_time)
-    : null;
+
+  // Backend rule is 'H:i' (HH:MM, no seconds).
+  // <input type="time"> may yield "HH:MM" or "HH:MM:SS"; normalize to "HH:MM".
+  let mt = null;
+  if (meeting_time) {
+    mt = String(meeting_time).slice(0, 5);   // "09:30:00" → "09:30", "09:30" → "09:30"
+  }
+
   return {
     ...rest,
     meeting_time: mt,
-    period: period || null,                 // NEW
+    period: period || null,
     repeat_preset: repeat?.preset ?? 'none',
     repeat_days: repeat?.preset === 'custom' ? repeat.days : null,
   };
