@@ -1,16 +1,18 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Task;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Carbon\Carbon;
 
 class TaskController extends Controller
 {
     private const REPEAT_PRESETS = ['none', 'daily', 'weekly', 'custom'];
     private const REPEAT_DAYS    = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+    private const PERIODS        = ['morning','afternoon','evening','night'];
 
     public function index(Request $request)
     {
@@ -29,11 +31,6 @@ class TaskController extends Controller
         return response()->json($tasks);
     }
 
-    /**
-     * GET /api/tasks/range?from=YYYY-MM-DD&to=YYYY-MM-DD
-     * Returns tasks whose due_date falls inside range, with tracks eager-loaded
-     * inside the same range. Used by the frontend dashboard/heatmap.
-     */
     public function range(Request $request)
     {
         $data = $request->validate([
@@ -112,6 +109,8 @@ class TaskController extends Controller
             'repeat_days'   => ['nullable', 'array'],
             'repeat_days.*' => ['string', Rule::in(self::REPEAT_DAYS)],
             'meeting_time'  => ['nullable', 'date_format:H:i'],
+
+            'period'        => ['sometimes', 'nullable', Rule::in(self::PERIODS)],
         ];
     }
 

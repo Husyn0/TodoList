@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 04, 2026 at 09:35 PM
+-- Generation Time: Oct 08, 2026 at 08:11 PM
 -- Server version: 8.0.46-0ubuntu0.24.04.4
 -- PHP Version: 8.3.6
 
@@ -143,6 +143,7 @@ CREATE TABLE `password_reset_tokens` (
 
 INSERT INTO `password_reset_tokens` (`email`, `token`, `created_at`) VALUES
 ('m+1791147088@example.com', '$2y$12$F7lEOVanly3DxMlgqKNKq.cMRU7kEGgP5aXpFoVDUnCd2REbgIpqe', '2026-10-04 17:51:30'),
+('mr.hussein.ceng@gmail.com', '$2y$12$xLokQKtjbCogEbP77V.Hd.TOkLqeU29.TRFAoUSSFOzfNGPi7MbzG', '2026-10-06 04:20:33'),
 ('test+1791131713@example.com', '$2y$12$CY.sw67v4fYBYkCl57KfbOqAep/VCJUSAk2x3mq/Mvs/u5ypEWjES', '2026-10-04 13:37:44'),
 ('verify+1791146578@example.com', '$2y$12$75oV/wcOP.9YW2dn/SN0xuV9EQEA9BgoqeqEOUDPiM4AH9oR9.o0K', '2026-10-04 17:46:03');
 
@@ -196,7 +197,12 @@ INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `n
 (28, 'App\\Models\\User', 31, 'auth', 'ee563635981d65c3f990d1aa9bdea140a48a86cbd340ca237d2695fc0d674628', '[\"*\"]', NULL, NULL, '2026-10-04 18:24:47', '2026-10-04 18:24:47'),
 (30, 'App\\Models\\User', 33, 'auth', '2a98afbee5e19c4df04328465d2810af8318584865ffabf4f3e921ac9dd34fd2', '[\"*\"]', '2026-10-04 18:26:52', NULL, '2026-10-04 18:26:52', '2026-10-04 18:26:52'),
 (31, 'App\\Models\\User', 32, 'auth', 'beeb2f3e12057c709bb2ed14974c9195ba2e0c9149e459485c2dcac64267f6b2', '[\"*\"]', NULL, NULL, '2026-10-04 18:28:17', '2026-10-04 18:28:17'),
-(32, 'App\\Models\\User', 32, 'auth', 'c30977cb119ff2b0ea6529eaa07c0d4b6c3fa0e22fbe22d1ebeda5169e576491', '[\"*\"]', '2026-10-04 18:28:42', NULL, '2026-10-04 18:28:42', '2026-10-04 18:28:42');
+(32, 'App\\Models\\User', 32, 'auth', 'c30977cb119ff2b0ea6529eaa07c0d4b6c3fa0e22fbe22d1ebeda5169e576491', '[\"*\"]', '2026-10-04 18:28:42', NULL, '2026-10-04 18:28:42', '2026-10-04 18:28:42'),
+(46, 'App\\Models\\User', 35, 'auth', '9b78b40308dcd1cf5abe9e8ffe5f094cfaf73096696cb7188255f6748e4bd3b5', '[\"*\"]', NULL, NULL, '2026-10-07 16:47:44', '2026-10-07 16:47:44'),
+(47, 'App\\Models\\User', 36, 'auth', '45260734c6d4f9bd174873c5c9d93c8528849222d0bcf0abf05976e59eafe21b', '[\"*\"]', NULL, NULL, '2026-10-07 16:54:14', '2026-10-07 16:54:14'),
+(48, 'App\\Models\\User', 34, 'auth', '694d577566650bb0b6b616a186b0b9807f0b13da040dd2f534c082ab6f07f0af', '[\"*\"]', '2026-10-07 17:08:08', NULL, '2026-10-07 17:05:36', '2026-10-07 17:08:08'),
+(50, 'App\\Models\\User', 34, 'auth', '6615e984a129f9267bec7a1d55dfd63314d119dc9ab6a06a73eb89dfe1e59f04', '[\"*\"]', '2026-10-08 16:47:39', NULL, '2026-10-08 16:47:39', '2026-10-08 16:47:39'),
+(51, 'App\\Models\\User', 34, 'auth', 'f54e8b780126b8b9586ed4a73d1093fea8ec0b3e0fa13eae5b7b9996c5833ec4', '[\"*\"]', '2026-10-08 17:07:11', NULL, '2026-10-08 16:58:31', '2026-10-08 17:07:11');
 
 -- --------------------------------------------------------
 
@@ -218,7 +224,9 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('C3D8O3EAwfXFh2JVVmiFKb7eT25UR1h3SH0IWooY', NULL, '127.0.0.1', 'curl/8.5.0', 'eyJfdG9rZW4iOiJJUUNpTVdSd0xhV0thSGllQ0ozb2JpeXBpSzBJbGswY1BSUUJ2RFlEIiwiX3ByZXZpb3VzIjp7InVybCI6Imh0dHA6XC9cL2xvY2FsaG9zdDo4MDAwIiwicm91dGUiOm51bGx9LCJfZmxhc2giOnsib2xkIjpbXSwibmV3IjpbXX19', 1791148625);
+('A2sDzxuUFTl4OkX6eLqGlJJGhjRpHmC95HYT3KGA', NULL, '127.0.0.1', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/60.5 Safari/605.1.15', 'eyJfdG9rZW4iOiIwOUlTTHdVa2FnbEd2dDJHVjR2djJwdUNOczYwaGlpbkh6aXU4QkREIiwiX3ByZXZpb3VzIjp7InVybCI6Imh0dHA6XC9cL2xvY2FsaG9zdDo4MDAwIiwicm91dGUiOm51bGx9LCJfZmxhc2giOnsib2xkIjpbXSwibmV3IjpbXX19', 1791276766),
+('C3D8O3EAwfXFh2JVVmiFKb7eT25UR1h3SH0IWooY', NULL, '127.0.0.1', 'curl/8.5.0', 'eyJfdG9rZW4iOiJJUUNpTVdSd0xhV0thSGllQ0ozb2JpeXBpSzBJbGswY1BSUUJ2RFlEIiwiX3ByZXZpb3VzIjp7InVybCI6Imh0dHA6XC9cL2xvY2FsaG9zdDo4MDAwIiwicm91dGUiOm51bGx9LCJfZmxhc2giOnsib2xkIjpbXSwibmV3IjpbXX19', 1791148625),
+('QMYoaudVTTkxOiFCYRxoSPNY6WcaqgADEw6Hxg5A', NULL, '127.0.0.1', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/60.5 Safari/605.1.15', 'eyJfdG9rZW4iOiJlV2RGUVI5ZWh3Rms0MFJ0M3FZT1JyUzZLUW1DTTRBTjdGV1dCRWhyIiwiX3ByZXZpb3VzIjp7InVybCI6Imh0dHA6XC9cL2xvY2FsaG9zdDo4MDAwIiwicm91dGUiOm51bGx9LCJfZmxhc2giOnsib2xkIjpbXSwibmV3IjpbXX19', 1791275636);
 
 -- --------------------------------------------------------
 
@@ -249,11 +257,11 @@ CREATE TABLE `tasks` (
 INSERT INTO `tasks` (`id`, `user_id`, `title`, `description`, `due_date`, `priority`, `status`, `position`, `repeat_preset`, `repeat_days`, `meeting_time`, `created_at`, `updated_at`) VALUES
 (4, 2, 'frw', 'rf', '2026-10-01', 'medium', 'done', 0, 'none', NULL, NULL, '2026-09-29 08:35:35', '2026-09-29 17:08:38'),
 (5, 2, 'hbhk', 'hbhk', '2026-09-27', 'medium', 'done', 0, 'none', NULL, NULL, '2026-09-29 08:35:44', '2026-10-02 17:15:33'),
-(7, 2, 'hbjg', 'gjf', '2026-10-03', 'medium', 'done', 0, 'none', NULL, NULL, '2026-09-29 08:36:01', '2026-10-02 10:43:47'),
+(7, 2, 'hbjg', 'gjf', '2026-10-04', 'medium', 'done', 0, 'none', NULL, NULL, '2026-09-29 08:36:01', '2026-10-04 18:50:35'),
 (8, 2, 'vhgvgv', 'jbhvjhcfh', '2026-10-01', 'medium', 'in_progress', 0, 'none', NULL, NULL, '2026-09-29 08:36:10', '2026-10-02 11:25:15'),
 (9, 2, 'jkhgyjh', 'nbmv', '2026-09-28', 'medium', 'done', 0, 'none', NULL, NULL, '2026-09-29 08:36:20', '2026-10-02 11:25:07'),
 (11, 2, 'Write project spec', 'Draft the initial requirements doc', '2026-10-02', 'high', 'pending', 0, 'none', NULL, NULL, '2026-09-29 08:43:38', '2026-10-02 11:25:21'),
-(12, 2, 'test', 'test sat', '2026-10-03', 'medium', 'done', 0, 'none', NULL, NULL, '2026-09-29 17:06:42', '2026-10-02 11:22:43'),
+(12, 2, 'test', 'test sat', '2026-10-05', 'medium', 'pending', 0, 'none', NULL, NULL, '2026-09-29 17:06:42', '2026-10-05 04:15:07'),
 (13, 2, 'test1', 'test1', '2026-10-02', 'medium', 'done', 0, 'none', NULL, NULL, '2026-09-29 17:07:22', '2026-09-29 17:07:22'),
 (14, 2, 'gugv', 'bvjghg', '2026-10-01', 'medium', 'pending', 0, 'none', NULL, NULL, '2026-09-29 17:07:45', '2026-09-29 17:07:45'),
 (15, 2, 'd', 'd', '2026-10-02', 'medium', 'done', 0, 'none', NULL, NULL, '2026-09-29 17:08:08', '2026-10-02 17:04:22'),
@@ -267,18 +275,24 @@ INSERT INTO `tasks` (`id`, `user_id`, `title`, `description`, `due_date`, `prior
 (25, 2, 'Automotors', 'Add sanctum=>laravel=>cookies', '2026-09-28', 'low', 'pending', 0, 'none', NULL, NULL, '2026-09-29 17:19:53', '2026-10-02 11:24:59'),
 (26, 2, 'Automotors', 'Reset password feature', '2026-09-30', 'low', 'pending', 0, 'none', NULL, NULL, '2026-09-29 17:20:39', '2026-10-02 11:25:00'),
 (27, 2, 'Automotors', 'Verify email', '2026-09-29', 'low', 'pending', 0, 'none', NULL, NULL, '2026-09-29 17:22:16', '2026-09-29 17:22:16'),
-(28, 2, 'Exercise', 'Do exercise in morning and get rest the remaining of day', '2026-10-03', 'high', 'pending', 0, 'none', NULL, NULL, '2026-09-29 17:26:13', '2026-09-29 17:26:13'),
+(28, 2, 'Exercise', 'Do exercise in morning and get rest the remaining of day', '2026-10-05', 'high', 'pending', 0, 'none', NULL, NULL, '2026-09-29 17:26:13', '2026-10-05 05:10:50'),
 (29, 2, 'test', 'test btn position', '2026-09-27', 'high', 'done', 0, 'none', NULL, NULL, '2026-10-02 10:40:21', '2026-10-02 17:04:33'),
 (31, 2, 'jvghc', 't', '2026-09-30', 'medium', 'pending', 0, 'none', NULL, NULL, '2026-10-02 10:43:03', '2026-10-02 11:24:57'),
 (32, 2, 'tydf', 'jvgf', '2026-09-28', 'medium', 'pending', 0, 'none', NULL, NULL, '2026-10-02 10:43:09', '2026-10-02 11:24:55'),
 (34, 2, 'ljnjgvcf', 'gvh', '2026-09-28', 'medium', 'done', 0, 'none', NULL, NULL, '2026-10-02 11:23:20', '2026-10-02 11:24:52'),
 (35, 2, 'ttfhdfd', 'fthfgdrtdrd', '2026-09-27', 'high', 'done', 0, 'none', NULL, NULL, '2026-10-02 16:54:21', '2026-10-02 17:15:44'),
-(41, 2, 'Recurring standup', 'Team sync', '2026-10-05', 'high', 'pending', 0, 'custom', '[\"monday\", \"wednesday\", \"friday\"]', '09:30:00', '2026-10-03 18:37:36', '2026-10-03 18:37:36'),
 (43, 2, 'Write project spec', 'Draft the initial requirements doc', '2026-10-01', 'high', 'pending', 0, 'none', NULL, NULL, '2026-10-03 19:13:08', '2026-10-03 19:13:08'),
 (44, 2, 'Review PRs', NULL, '2026-09-29', 'medium', 'pending', 0, 'none', NULL, NULL, '2026-10-03 19:13:19', '2026-10-03 19:13:19'),
 (45, 12, 'Task A (updated)', 'first', '2026-10-02', 'medium', 'in_progress', 5, 'none', NULL, NULL, '2026-10-03 19:28:07', '2026-10-03 19:28:35'),
 (48, 26, 'Task A (updated)', 'first', '2026-10-02', 'medium', 'in_progress', 5, 'none', NULL, NULL, '2026-10-04 17:49:52', '2026-10-04 17:50:31'),
-(51, 32, 'regression', NULL, '2026-10-05', 'medium', 'pending', 0, 'none', NULL, NULL, '2026-10-04 18:28:42', '2026-10-04 18:28:42');
+(51, 32, 'regression', NULL, '2026-10-05', 'medium', 'pending', 0, 'none', NULL, NULL, '2026-10-04 18:28:42', '2026-10-04 18:28:42'),
+(52, 2, 'bhjvgh', 'hjvhcf', '2026-10-05', 'medium', 'done', 0, 'none', NULL, NULL, '2026-10-04 18:51:30', '2026-10-05 04:15:19'),
+(53, 2, 'meeting', 'weekly meeting', '2026-10-06', 'medium', 'pending', 0, 'daily', NULL, NULL, '2026-10-05 04:47:05', '2026-10-05 04:47:15'),
+(54, 2, 'jhuiyug', 'kbhjvghc', '2026-10-08', 'medium', 'pending', 0, 'none', NULL, NULL, '2026-10-05 05:09:51', '2026-10-05 05:09:51'),
+(55, 2, 'kugjfr', 'ghjhf', '2026-10-04', 'medium', 'done', 0, 'custom', '[\"monday\", \"wednesday\"]', NULL, '2026-10-05 05:16:16', '2026-10-05 05:18:23'),
+(56, 34, ',nn bhk', 'jnjk', '2026-10-07', 'medium', 'pending', 0, 'none', NULL, NULL, '2026-10-08 16:33:09', '2026-10-08 16:33:09'),
+(57, 34, 'fc', 'vj', '2026-10-08', 'medium', 'pending', 0, 'none', NULL, NULL, '2026-10-08 16:33:21', '2026-10-08 16:33:21'),
+(58, 34, 'mbhjb', 'h hbhb', '2026-10-15', 'medium', 'pending', 0, 'none', NULL, NULL, '2026-10-08 17:06:59', '2026-10-08 17:06:59');
 
 -- --------------------------------------------------------
 
@@ -296,6 +310,15 @@ CREATE TABLE `task_tracks` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `task_tracks`
+--
+
+INSERT INTO `task_tracks` (`id`, `user_id`, `task_id`, `date`, `status`, `meeting_time`, `created_at`, `updated_at`) VALUES
+(14, 2, 28, '2026-10-03', 'done', NULL, '2026-10-04 18:50:27', '2026-10-04 18:50:27'),
+(17, 2, 12, '2026-10-05', 'pending', NULL, '2026-10-05 04:14:50', '2026-10-05 04:14:50'),
+(18, 2, 55, '2026-10-04', 'done', NULL, '2026-10-05 05:16:53', '2026-10-05 05:16:53');
 
 -- --------------------------------------------------------
 
@@ -323,7 +346,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`, `theme`, `timezone`, `week_start`) VALUES
 (1, 'husyn', 'mr.hussein.ceng@gmail.com', NULL, '$2y$12$ZmpBYVxv9hMKTEF/xHKqZe3gAAmDKbeZaFuXWg0oUMFR0zZWWLERG', NULL, '2026-09-29 07:09:23', '2026-09-29 07:09:23', 'light', 'UTC', 'monday'),
-(2, 'Test User Renamed', 'test@example.com', NULL, '$2y$12$yZMj/GAjund/mfNVDASefOQ.95wMLYESq3icJajuO3h/n1yV6dBJW', NULL, '2026-09-29 07:41:52', '2026-10-03 19:15:32', 'dark', 'Asia/Beirut', 'sunday'),
+(2, 'Test User Renamed', 'test@example.com', NULL, '$2y$12$yZMj/GAjund/mfNVDASefOQ.95wMLYESq3icJajuO3h/n1yV6dBJW', NULL, '2026-09-29 07:41:52', '2026-10-05 05:14:22', 'light', 'Asia/Beirut', 'sunday'),
 (3, 'Test User', 'test_1790680534@example.com', NULL, '$2y$12$4tQUGE7PDcpf/qtyYH/lpOGo36nMSpPsGuYRFqxo3hbhcIc2lo/mK', NULL, '2026-09-29 08:15:35', '2026-09-29 08:15:35', 'light', 'UTC', 'monday'),
 (4, 'Test User', 'test2@example.com', NULL, '$2y$12$QZ0fo6B9gkago7R3yyze7OoSCp3SA9Z926is6Tu3koxUPpo9cDHdS', NULL, '2026-09-29 08:22:04', '2026-09-29 08:22:04', 'light', 'UTC', 'monday'),
 (5, 'Test User', 'test_1790681376@example.com', NULL, '$2y$12$3NYpJKlvopHvS97r17ZMeegVfDvueNVmA55JbVTgwM.BmSJTSiHK.', NULL, '2026-09-29 08:29:36', '2026-09-29 08:29:37', 'dark', 'UTC', 'sunday'),
@@ -354,7 +377,10 @@ INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `re
 (30, 'Other', 'other+1791147277@example.com', NULL, '$2y$12$0Q2edk5czNLySTUswno1WOuhViAU/no3VlMBWy1KovDooKNmzLwlu', NULL, '2026-10-04 17:54:37', '2026-10-04 17:54:37', 'light', 'UTC', 'monday'),
 (31, 'Test 1791149083', 'verify+1791149083@example.com', '2026-10-04 18:24:45', '$2y$12$DHFWGQJRHkFhmJrPZ/kMS.EA27s1pB8CPLma4Vfzcxua8YqbU4b3y', 'HBuZOqx2CWAmnPQVQyp6kzXEbdxx4PSMPyVyjFI1KXSyBBRx9yKoiPXDDrzP', '2026-10-04 18:24:43', '2026-10-04 18:24:46', 'light', 'UTC', 'monday'),
 (32, 'Test 1791149136', 'verify+1791149136@example.com', '2026-10-04 18:25:54', '$2y$12$45ldbCcw1mPsdnU.V1tgw.O8P4b54N4ydQJdMT463eR99nPQOUtRC', 'xbyGFC9B6Rr68eH0GlSyw1YC0v1XR95QcjZhesxK7uOYlRaPx8dfBBGX9ujm', '2026-10-04 18:25:36', '2026-10-04 18:28:10', 'light', 'UTC', 'monday'),
-(33, 'R 1791149210', 'resend+1791149210@example.com', NULL, '$2y$12$r3.U4tBppwhEvUoWF02HwunxE1MjlVf/pNuHdnrTiO.RN8GPBCm.u', NULL, '2026-10-04 18:26:50', '2026-10-04 18:26:50', 'light', 'UTC', 'monday');
+(33, 'R 1791149210', 'resend+1791149210@example.com', NULL, '$2y$12$r3.U4tBppwhEvUoWF02HwunxE1MjlVf/pNuHdnrTiO.RN8GPBCm.u', NULL, '2026-10-04 18:26:50', '2026-10-04 18:26:50', 'light', 'UTC', 'monday'),
+(34, 'test', 'debugdevtest0@gmail.com', '2026-10-08 16:34:49', '$2y$12$Jd7ZfjuPeFbgCTVkmqFkNOmVYlD7e5rBJVFHdnqdPdb6fxNqmt3ei', 'VWmQl0JT40Y8nkJ0eMMnxB4wuxdUqWJnDLzNzk85u5rTt4Xamn3yiApHvP91', '2026-10-06 04:28:35', '2026-10-08 16:59:11', 'light', 'UTC', 'monday'),
+(35, 'V1', 'verify1+1791402461@example.com', NULL, '$2y$12$EdBNpW3i7YuhVZW8tQF5duMq2eXqWNTdmLooyjMu6WJ0tsc5H7rDi', NULL, '2026-10-07 16:47:42', '2026-10-07 16:47:42', 'light', 'UTC', 'monday'),
+(36, 'Test 1791402851', 'verify+1791402851@example.com', NULL, '$2y$12$Ty4AXj/dtZ0BpbM0BRaxkuoInZ6MLjNTpmv5o03pV3srWAeQhPws.', NULL, '2026-10-07 16:54:11', '2026-10-07 16:54:11', 'light', 'UTC', 'monday');
 
 --
 -- Indexes for dumped tables
@@ -472,25 +498,25 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `personal_access_tokens`
 --
 ALTER TABLE `personal_access_tokens`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT for table `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
 
 --
 -- AUTO_INCREMENT for table `task_tracks`
 --
 ALTER TABLE `task_tracks`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- Constraints for dumped tables

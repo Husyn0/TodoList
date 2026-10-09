@@ -13,6 +13,8 @@ Every id/token is captured into a shell variable. **Do not copy ids manually.**
 ## 0. Session setup
 
 ```bash
+DEV_EMAIL="debugdevtest0@gmail.com"
+DEV_PASSWORD="password12345"
 EMAIL="debugdevtest0@gmail.com"
 PASSWORD="password12345"
 

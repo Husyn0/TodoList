@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
@@ -19,6 +20,7 @@ class Task extends Model
         'repeat_preset',
         'repeat_days',
         'meeting_time',
+        'period',
     ];
 
     protected $casts = [
