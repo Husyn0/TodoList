@@ -7,6 +7,7 @@ import WeekBoard from '../components/tasks/WeekBoard';
 import TimeFrameChart from '../components/tasks/TimeFrameChart';
 import { tasksApi, tracksApi } from '../api';
 import { useAuth } from '../context/AuthContext';
+import MonthCalendar from '../components/tasks/MonthCalendar';
 import {
   occursOnDate,
   isPastDate,
@@ -257,15 +258,16 @@ export default function Tasks() {
       )}
 
       {view === 'month' && (
-        <MonthList
-          days={days}
+        <MonthCalendar
+          anchor={anchorDate}
+          weekStartKey={weekStartKey}
+          weekEndKey={weekEndKey}
           tasksByDay={tasksByDay}
           tracks={tracks}
           onAdd={(date) => setModal({ open: true, date, task: null })}
           onEdit={(task) => setModal({ open: true, date: null, task })}
         />
       )}
-
       {modal.open && (
         <AddTaskModal
           initialDate={modal.date || modal.task?.due_date?.split('T')[0]}

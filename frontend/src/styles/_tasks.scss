@@ -134,33 +134,192 @@
 }
 
 /* ============================================================
-   Month view — compact per-day list (replaces the board)
+   Month calendar
+   - 7 (or N) columns wide, one per active weekday
+   - one row per week in the month
+   - each cell is a calendar tile with day number + task chips
    ============================================================ */
-.month-list {
+.month-calendar {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   margin-top: 4px;
+}
+
+/* ---------- Weekday header row ---------- */
+.month-header {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 7), minmax(0, 1fr));
+  gap: 8px;
+}
+
+.month-header-cell {
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: $muted;
+  text-align: center;
+}
+
+/* ---------- Week rows ---------- */
+.month-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .month-row {
   display: grid;
-  grid-template-columns: 56px 1fr 32px;
-  gap: 12px;
-  align-items: center;
-  padding: 8px 12px;
+  grid-template-columns: repeat(var(--cols, 7), minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* ---------- Day cell ---------- */
+.month-cell {
+  display: flex;
+  flex-direction: column;
+  min-height: 110px;
+  background: $surface;
   border: 1px solid $border;
   border-radius: $radius-sm;
-  background: $surface;
+  overflow: hidden;
   transition: border-color $transition, background $transition;
 
+  &:hover { border-color: rgba($primary, .35); }
+
   &.is-today {
-    border-color: rgba($primary, .5);
-    background: rgba($primary, .06);
+    border-color: rgba($primary, .6);
+    box-shadow: 0 0 0 2px rgba($primary, .12);
+
+    .month-cell-num {
+      background: $primary;
+      color: #fff;
+      border-radius: $radius-pill;
+    }
   }
 
-  &.is-past { opacity: .65; }
+  &.is-past {
+    background: rgba($muted, .04);
+
+    .month-cell-body { opacity: .8; }
+  }
+
+  &.is-other-month {
+    background: transparent;
+    border-style: dashed;
+    opacity: .55;
+
+    .month-cell-num { color: $muted; }
+  }
 }
+
+/* ---------- Head ---------- */
+.month-cell-head {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 6px 0;
+}
+
+.month-cell-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: $text;
+}
+
+/* ---------- Body ---------- */
+.month-cell-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 2px 6px 6px;
+  overflow-y: auto;
+
+  scrollbar-width: thin;
+  scrollbar-color: $border transparent;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb {
+    background: $border;
+    border-radius: 2px;
+  }
+  &::-webkit-scrollbar-track { background: transparent; }
+}
+
+/* ---------- Task chips ---------- */
+.month-chip {
+  border: 1px solid $border;
+  background: $surface;
+  color: $text;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-left-width: 3px;
+  transition: $transition;
+
+  &.status-done        { border-left-color: $low;    opacity: .75; text-decoration: line-through; }
+  &.status-in_progress { border-left-color: $medium; }
+  &.status-pending     { border-left-color: $muted; }
+
+  &:hover { background: $bg; }
+}
+
+/* ---------- Footer: add button ---------- */
+.month-cell-add {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  border-top: 1px dashed $border;
+  color: $muted;
+  font-size: 14px;
+  line-height: 1;
+  transition: $transition;
+
+  &:hover:not(:disabled) {
+    background: $primary;
+    color: #fff;
+    border-top-color: $primary;
+  }
+
+  &:disabled {
+    opacity: .25;
+    cursor: not-allowed;
+  }
+}
+
+/* ---------- Responsive: fewer columns on smaller screens ---------- */
+@media (max-width: 900px) {
+  .month-header { display: none; }   /* weekday labels lose meaning when stacked */
+
+  .month-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .month-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 
 .month-row-date {
   display: flex;
@@ -195,48 +354,4 @@
   opacity: .6;
 }
 
-.month-chip {
-  border: 1px solid $border;
-  background: $surface;
-  color: $text;
-  border-radius: $radius-pill;
-  padding: 3px 10px;
-  font-size: 12px;
-  font-weight: 500;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border-left-width: 3px;
-  transition: $transition;
-
-  /* status accent on the left edge */
-  &.status-done        { border-left-color: $low;    opacity: .8; text-decoration: line-through; }
-  &.status-in_progress { border-left-color: $medium; }
-  &.status-pending     { border-left-color: $muted;  }
-
-  &:hover { background: $bg; }
-}
-
-.month-row-add {
-  width: 30px;
-  height: 30px;
-  border-radius: $radius-sm;
-  border: 1px dashed $border;
-  background: transparent;
-  color: $muted;
-  font-size: 16px;
-  line-height: 1;
-  transition: $transition;
-
-  &:hover:not(:disabled) {
-    border-color: $primary;
-    color: $primary;
-  }
-
-  &:disabled {
-    opacity: .3;
-    cursor: not-allowed;
-  }
-}
 .view-toggle { @include segmented; }
