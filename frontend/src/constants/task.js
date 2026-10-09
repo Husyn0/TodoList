@@ -2,6 +2,21 @@
 
 export const PRIORITY_LETTER = { low: 'L', medium: 'M', high: 'H' };
 
+export const PERIODS = [
+  { value: '',          label: 'Any time' },
+  { value: 'morning',   label: 'Morning' },
+  { value: 'afternoon', label: 'Afternoon' },
+  { value: 'evening',   label: 'Evening' },
+  { value: 'night',     label: 'Night' },
+];
+
+export const PERIOD_ICON = {
+  morning:   '🌅',
+  afternoon: '☀️',
+  evening:   '🌆',
+  night:     '🌙',
+};
+
 export const WEEKDAYS = [
   { value: 'monday',    label: 'Mon' },
   { value: 'tuesday',   label: 'Tue' },
@@ -25,12 +40,49 @@ export const DEFAULT_REPEAT = { preset: 'none', days: [] };
 export const DAY_KEY_BY_INDEX = [
   'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday',
 ];
+// Ordered list of weekday keys Mon→Sun (matching WEEKDAYS order)
+export const WEEKDAY_ORDER = [
+  'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+];
 
+// JS Date.getDay(): 0=Sun…6=Sat → index into WEEKDAY_ORDER
+export const JS_DAY_TO_ORDER = {
+  1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 0: 6,
+};
+
+/**
+ * Return the list of weekday keys between `weekStart` and `weekEnd`
+ * inclusive, following the WEEKDAY_ORDER (Monday-first) sequence.
+ *
+ * Example:
+ *   weekStart='monday', weekEnd='friday' → ['monday','tuesday','wednesday','thursday','friday']
+ *   weekStart='sunday', weekEnd='sunday' → ['sunday']
+ *   weekStart='monday', weekEnd='sunday' → all 7 days
+ */
+export const activeWeekdays = (weekStart = 'monday', weekEnd = 'sunday') => {
+  const startIdx = WEEKDAY_ORDER.indexOf(weekStart);
+  const endIdx   = WEEKDAY_ORDER.indexOf(weekEnd);
+  if (startIdx === -1 || endIdx === -1) return WEEKDAY_ORDER;
+
+  const days = [];
+  let i = startIdx;
+  // walk forward through the cycle until we hit endIdx
+  while (true) {
+    days.push(WEEKDAY_ORDER[i]);
+    if (i === endIdx) break;
+    i = (i + 1) % 7;
+    // safety net if start===end we stop after 1; otherwise guard against
+    // running away (shouldn't happen since WEEKDAY_ORDER is length 7)
+    if (days.length > 7) break;
+  }
+  return days;
+};
 // ---------- backend <-> frontend mapping ----------
 export const normalizeTask = (t) => ({
   ...t,
   due_date: t.due_date ? String(t.due_date).split('T')[0] : t.due_date,
   meeting_time: (t.meeting_time || '').slice(0, 5),
+  period: t.period || null,                 // NEW
   repeat: {
     preset: t.repeat_preset ?? 'none',
     days: t.repeat_days ?? [],
@@ -38,13 +90,14 @@ export const normalizeTask = (t) => ({
 });
 
 export const denormalizeTask = (form) => {
-  const { repeat, meeting_time, ...rest } = form;
+  const { repeat, meeting_time, period, ...rest } = form;
   const mt = meeting_time
     ? (meeting_time.length === 5 ? `${meeting_time}:00` : meeting_time)
     : null;
   return {
     ...rest,
     meeting_time: mt,
+    period: period || null,                 // NEW
     repeat_preset: repeat?.preset ?? 'none',
     repeat_days: repeat?.preset === 'custom' ? repeat.days : null,
   };
@@ -63,6 +116,12 @@ export const describeRepeat = (repeat) => {
     return labels.join(' · ');
   }
   return null;
+};
+
+export const describePeriod = (period) => {
+  if (!period) return null;
+  const found = PERIODS.find((p) => p.value === period);
+  return found ? `${PERIOD_ICON[period] || ''} ${found.label}`.trim() : period;
 };
 
 /**

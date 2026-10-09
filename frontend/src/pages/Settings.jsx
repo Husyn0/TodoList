@@ -11,6 +11,7 @@ export default function Settings() {
     theme: 'light',
     timezone: detectTimezone(),
     week_start: 'monday',
+    week_end: 'sunday',            // NEW
   });
   const [pwd, setPwd] = useState({
     current_password: '',
@@ -26,7 +27,15 @@ export default function Settings() {
   const [verifyMsg, setVerifyMsg] = useState('');
 
   useEffect(() => {
-    settingsApi.getSettings().then(setForm);
+    settingsApi.getSettings().then((data) => {
+      setForm({
+        name: data.name ?? '',
+        theme: data.theme ?? 'light',
+        timezone: data.timezone ?? detectTimezone(),
+        week_start: data.week_start ?? 'monday',
+        week_end: data.week_end ?? 'sunday',     // NEW
+      });
+    });
   }, []);
 
   const flash = (text, type = 'success') => {
@@ -35,17 +44,17 @@ export default function Settings() {
     setTimeout(() => setMsg(''), 2500);
   };
 
-  // ---- Profile (name, week_start, timezone) ----
+  // ---- Profile (name, week_start, week_end, timezone) ----
   const saveProfile = async (e) => {
     e.preventDefault();
     setSavingProfile(true);
     try {
-      // Preserve current theme — this form no longer edits it
       const payload = {
         name: form.name,
         theme: user?.theme || form.theme,
         timezone: form.timezone,
         week_start: form.week_start,
+        week_end: form.week_end,                 // NEW
       };
       const data = await settingsApi.updateSettings(payload);
       setUser(data.user);
@@ -62,7 +71,6 @@ export default function Settings() {
   const setTheme = async (next) => {
     if (next === form.theme) return;
     const prev = form.theme;
-    // optimistic: update local state and DOM immediately
     setForm((f) => ({ ...f, theme: next }));
     document.documentElement.setAttribute('data-theme', next);
     setSavingTheme(true);
@@ -72,11 +80,11 @@ export default function Settings() {
         theme: next,
         timezone: form.timezone,
         week_start: form.week_start,
+        week_end: form.week_end,                 // NEW
       });
       setUser(data.user);
       flash(`Theme set to ${next}`);
     } catch (err) {
-      // roll back
       setForm((f) => ({ ...f, theme: prev }));
       document.documentElement.setAttribute('data-theme', prev);
       flash('Could not change theme', 'error');
@@ -230,6 +238,21 @@ export default function Settings() {
               >
                 <option value="monday">Monday</option>
                 <option value="sunday">Sunday</option>
+              </select>
+            </label>
+
+            {/* NEW: Week ends on */}
+            <label className="field">
+              <span>Week ends on</span>
+              <select
+                value={form.week_end}
+                onChange={(e) =>
+                  setForm({ ...form, week_end: e.target.value })
+                }
+              >
+                <option value="sunday">Sunday</option>
+                <option value="saturday">Saturday</option>
+                <option value="friday">Friday</option>
               </select>
             </label>
 

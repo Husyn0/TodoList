@@ -11,14 +11,29 @@ import {
   trackKey,
   statusForOccurrence,
   todayKey,
+  activeWeekdays,
+  WEEKDAY_ORDER,
+  DAY_KEY_BY_INDEX,
 } from '../constants/task';
 
-const startOfWeek = (date, weekStart = 'monday') => {
+/**
+ * Anchor date: the date (in the current week) that corresponds to
+ * `weekStart` for the given calendar week.
+ */
+const anchorWeekStart = (date, weekStart = 'monday') => {
+  const target = WEEKDAY_ORDER.indexOf(weekStart);
   const d = new Date(date);
-  const day = d.getDay();
-  const diff = weekStart === 'monday' ? (day === 0 ? -6 : 1 - day) : -day;
-  d.setDate(d.getDate() + diff);
+  // find the weekday key of d
+  const currentKey = DAY_KEY_BY_INDEX[d.getDay()];
+  const current = WEEKDAY_ORDER.indexOf(currentKey);
+
+  // move back to the start of the week (Mon-first sequence)
+  const diffToMonday = (current + 7) % 7;
+  d.setDate(d.getDate() - diffToMonday);
   d.setHours(0, 0, 0, 0);
+
+  // now d is Monday of this week; shift to the requested weekStart
+  d.setDate(d.getDate() + target);
   return d;
 };
 
@@ -26,22 +41,25 @@ const fmt = (d) => d.toISOString().split('T')[0];
 
 export default function Tasks() {
   const { user } = useAuth();
+  const weekStartKey = user?.week_start || 'monday';
+  const weekEndKey   = user?.week_end   || 'sunday';
+
   const [weekStart, setWeekStart] = useState(() =>
-    startOfWeek(new Date(), user?.week_start || 'monday')
+    anchorWeekStart(new Date(), weekStartKey)
   );
   const [tasks, setTasks] = useState([]);
   const [tracks, setTracks] = useState({});
   const [activeTask, setActiveTask] = useState(null);
   const [modal, setModal] = useState({ open: false, date: null, task: null });
 
-  // Sync weekStart when user preference loads/changes
+  // Re-anchor when user preference loads/changes
   useEffect(() => {
-    if (user?.week_start) {
-      setWeekStart(startOfWeek(new Date(), user.week_start));
-    }
-  }, [user?.week_start]);
+    setWeekStart(anchorWeekStart(new Date(), weekStartKey));
+  }, [weekStartKey]);
 
-  const days = Array.from({ length: 7 }, (_, i) => {
+  // Days to render = active weekdays between week_start and week_end
+  const activeKeys = activeWeekdays(weekStartKey, weekEndKey);
+  const days = activeKeys.map((key, i) => {
     const d = new Date(weekStart);
     d.setDate(d.getDate() + i);
     return d;
@@ -52,11 +70,12 @@ export default function Tasks() {
   );
 
   const load = useCallback(() => {
-    const from = fmt(weekStart);
-    const to = fmt(new Date(weekStart.getTime() + 6 * 86400000));
+    if (days.length === 0) return;
+    const from = fmt(days[0]);
+    const to   = fmt(days[days.length - 1]);
     tasksApi.getTasksForWeek(from).then(setTasks);
     tracksApi.getTracks(from, to).then(setTracks);
-  }, [weekStart]);
+  }, [weekStart, weekStartKey, weekEndKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     load();
@@ -152,8 +171,8 @@ export default function Tasks() {
   return (
     <div className="tasks-page">
       <TasksHeader
-        weekStart={weekStart}
-        weekEnd={days[6]}
+        weekStart={days[0] || weekStart}
+        weekEnd={days[days.length - 1] || weekStart}
         doneToday={doneToday}
         onChangeWeek={changeWeek}
       />

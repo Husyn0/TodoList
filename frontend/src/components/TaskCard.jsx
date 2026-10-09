@@ -1,5 +1,9 @@
 import { useDraggable } from '@dnd-kit/core';
-import { PRIORITY_LETTER, describeRepeat } from '../constants/task';
+import {
+  PRIORITY_LETTER,
+  describeRepeat,
+  describePeriod,
+} from '../constants/task';
 
 export default function TaskCard({
   task,
@@ -13,6 +17,7 @@ export default function TaskCard({
 }) {
   const isRepeated = task.repeat && task.repeat.preset !== 'none';
   const repeatLabel = describeRepeat(task.repeat);
+  const periodLabel = describePeriod(task.period);   // NEW
 
   // prefer the per-occurrence values, fall back to the task's own
   const status = occurrenceStatus ?? task.status ?? 'pending';
@@ -65,6 +70,11 @@ export default function TaskCard({
           ↻ {repeatLabel}
           {occurrenceDate && isRepeated ? ' · occurrence' : ''}
         </div>
+      )}
+
+      {/* NEW: period badge */}
+      {periodLabel && (
+        <div className={`task-period period-${task.period}`}>{periodLabel}</div>
       )}
 
       <div className="task-footer">

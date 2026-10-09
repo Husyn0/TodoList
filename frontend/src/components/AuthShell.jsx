@@ -28,7 +28,6 @@ export default function AuthShell({ children }) {
 
         <div className="auth-brand-content">
           <Link to="/" className="auth-logo">
-            <span className="auth-logo-mark">📝</span>
             <span className="auth-logo-text">TodoList</span>
           </Link>
 

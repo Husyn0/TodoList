@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   WEEKDAYS,
   REPEAT_PRESETS,
+  PERIODS,
   DEFAULT_REPEAT,
   todayKey,
   isPastDate,
@@ -17,6 +18,7 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
     status: task?.status || 'pending',
     position: task?.position ?? 0,
     meeting_time: (task?.meeting_time || '').slice(0, 5),
+    period: task?.period || '',                       // NEW
     repeat: task?.repeat || DEFAULT_REPEAT,
   });
   const [saving, setSaving] = useState(false);
@@ -129,6 +131,21 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
             </select>
           </label>
         </div>
+
+        {/* NEW: Period */}
+        <label>
+          Period of day
+          <select
+            value={form.period}
+            onChange={(e) => setForm({ ...form, period: e.target.value })}
+          >
+            {PERIODS.map((p) => (
+              <option key={p.value} value={p.value}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </label>
 
         <label>
           Repeat
