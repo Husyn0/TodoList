@@ -1,54 +1,242 @@
 @use 'variables' as *;
 @use 'mixins' as *;
 
+/* ============================================================
+   Tasks page — header, view toggle, timeframe chart, board, month list
+   ============================================================ */
+
 .tasks-page {
   display: flex;
   flex-direction: column;
   gap: 20px;
   height: 100%;
+}
 
-  .tasks-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* ---------- Header ---------- */
+.tasks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 
-    h1 { margin: 0; }
+  h1 { margin: 0; }
+}
 
-    .week-nav {
-      display: flex;
-      gap: 12px;
-      align-items: center;
+.tasks-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 
-      button {
-        background: $surface;
-        border: 1px solid $border;
-        width: 36px;
-        height: 36px;
-        border-radius: $radius-sm;
+/* ---------- Week / Month toggle ---------- */
+.view-toggle {
+  display: inline-flex;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  background: $surface;
 
-        &:hover { background: $bg; }
-      }
+  button {
+    border: 0;
+    background: transparent;
+    color: $muted;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: $transition;
 
-      span { font-size: 14px; color: $muted; }
+    & + button { border-left: 1px solid $border; }
 
-      .done-today {
-        margin-left: 12px;
-        font-size: 12px;
-        font-weight: 600;
-        color: $low;
-        background: rgba($low, .1);
-        padding: 4px 10px;
-        border-radius: $radius-pill;
-      }
+    &:hover:not(.active) { color: $text; background: $bg; }
+
+    &.active {
+      background: $primary;
+      color: #fff;
     }
   }
+}
 
-  .week-board {
-    display: flex;
-    gap: 16px;
-    flex: 1;
-    overflow-x: auto;
-    padding-bottom: 8px;
-    align-items: flex-start;
+/* ---------- Week nav (reused by both views) ---------- */
+.tasks-header .week-nav {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  button {
+    background: $surface;
+    border: 1px solid $border;
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-sm;
+    color: $text;
+    transition: $transition;
+
+    &:hover { background: $bg; }
+  }
+
+  /* the "Today" button is wider than the arrow buttons */
+  .week-nav-today {
+    width: auto;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: $muted;
+
+    &:hover { color: $text; }
+  }
+
+  span { font-size: 14px; color: $muted; }
+
+  .done-today {
+    margin-left: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: $low;
+    background: rgba($low, .1);
+    padding: 4px 10px;
+    border-radius: $radius-pill;
   }
 }
+
+/* ============================================================
+   Time-frame chart (bar chart: tasks per day, stacked by status)
+   ============================================================ */
+.timeframe-chart {
+  @include card-flex(14px, 20px);
+
+  .chart-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+
+    h2 { margin: 0 0 2px; font-size: 18px; color: $text; }
+    .muted { margin: 0; font-size: 13px; color: $muted; }
+  }
+
+  /* recharts needs an explicit height on the container */
+  .recharts-responsive-container {
+    min-width: 0;
+  }
+}
+
+/* ============================================================
+   Week board (unchanged behavior, kept for parity)
+   ============================================================ */
+.week-board {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  align-items: flex-start;
+}
+
+/* ============================================================
+   Month view — compact per-day list (replaces the board)
+   ============================================================ */
+.month-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.month-row {
+  display: grid;
+  grid-template-columns: 56px 1fr 32px;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  background: $surface;
+  transition: border-color $transition, background $transition;
+
+  &.is-today {
+    border-color: rgba($primary, .5);
+    background: rgba($primary, .06);
+  }
+
+  &.is-past { opacity: .65; }
+}
+
+.month-row-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  color: $muted;
+}
+
+.month-row-day {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.month-row-num {
+  font-size: 18px;
+  font-weight: 700;
+  color: $text;
+}
+
+.month-row-tasks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.month-row-empty {
+  font-size: 13px;
+  color: $muted;
+  opacity: .6;
+}
+
+.month-chip {
+  border: 1px solid $border;
+  background: $surface;
+  color: $text;
+  border-radius: $radius-pill;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-left-width: 3px;
+  transition: $transition;
+
+  /* status accent on the left edge */
+  &.status-done        { border-left-color: $low;    opacity: .8; text-decoration: line-through; }
+  &.status-in_progress { border-left-color: $medium; }
+  &.status-pending     { border-left-color: $muted;  }
+
+  &:hover { background: $bg; }
+}
+
+.month-row-add {
+  width: 30px;
+  height: 30px;
+  border-radius: $radius-sm;
+  border: 1px dashed $border;
+  background: transparent;
+  color: $muted;
+  font-size: 16px;
+  line-height: 1;
+  transition: $transition;
+
+  &:hover:not(:disabled) {
+    border-color: $primary;
+    color: $primary;
+  }
+
+  &:disabled {
+    opacity: .3;
+    cursor: not-allowed;
+  }
+}
+.view-toggle { @include segmented; }

@@ -1,59 +1,119 @@
 @use '../variables' as *;
 @use '../mixins' as *;
 
-.app-shell {
-  display: flex;
-  min-height: 100vh;
+/* ============================================================
+   App shell — no page scroll, sidebar static, main scrolls
+   ============================================================ */
 
-  .sidebar {
-    width: 240px;
-    background: $surface;
-    border-right: 1px solid $border;
-    padding: 24px 16px;
+.app-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  height: 100vh;             /* fills viewport; page never scrolls */
+  overflow: hidden;          /* the outer shell never scrolls */
+
+  @media (max-width: 820px) {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;       /* on mobile, let the page scroll normally */
+  }
+}
+
+/* ---------- Sidebar (static, always visible) ---------- */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 16px;
+  background: $surface;
+  border-right: 1px solid $border;
+  height: 100vh;             /* exact viewport height */
+  overflow: hidden;          /* its own areas scroll, not the page */
+
+  h2 { margin: 0; flex: 0 0 auto; }
+
+  nav {
+    flex: 1 1 auto;
+    min-height: 0;           /* allows the nav to scroll internally */
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 6px;
 
-    h2 { margin: 0; }
+    a {
+      padding: 10px 12px;
+      border-radius: $radius-sm;
+      color: $text;
+      text-decoration: none;
+      transition: $transition;
 
-    nav {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-
-      a {
-        padding: 10px 12px;
-        border-radius: $radius-sm;
-        color: $text;
-        text-decoration: none;
-        transition: $transition;
-
-        &:hover { background: $bg; }
-        &.active { background: $primary; color: white; }
-      }
-    }
-
-    .user-box {
-      margin-top: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      font-size: 14px;
-
-      button {
-        background: $danger;
-        color: white;
-        border: none;
-        padding: 8px;
-        border-radius: 6px;
-        cursor: pointer;
-      }
+      &:hover  { background: $bg; }
+      &.active { background: $primary; color: white; }
     }
   }
 
-  .main-content {
-    flex: 1;
-    padding: 32px;
-    overflow: auto;
+  .user-box {
+    flex: 0 0 auto;          /* always visible at the bottom */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+    padding-top: 16px;
+    border-top: 1px solid $border;
+
+    span {
+      color: $text;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    button {
+      background: $danger;
+      color: white;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: $transition;
+
+      &:hover { filter: brightness(.95); }
+    }
+  }
+
+  @media (max-width: 820px) {
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid $border;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+
+    nav {
+      overflow: visible;
+      flex-direction: row;
+    }
+
+    .user-box {
+      flex-direction: row;
+      align-items: center;
+      padding-top: 0;
+      margin-left: auto;
+      border-top: none;
+    }
+  }
+}
+
+/* ---------- Main content (the only thing that scrolls) ---------- */
+.main-content {
+  min-width: 0;
+  height: 100vh;
+  overflow-y: auto;          /* only this pane scrolls */
+  padding: 32px;
+
+  @media (max-width: 820px) {
+    height: auto;
+    overflow: visible;
+    padding: 20px 16px;
   }
 }

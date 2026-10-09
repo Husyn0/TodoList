@@ -1,38 +1,343 @@
 @use 'variables' as *;
+@use 'mixins' as *;
 
+/* ============================================================
+   Dashboard page
+   ============================================================ */
 .dashboard-page {
   display: flex;
   flex-direction: column;
   gap: 20px;
 
   h1 { margin-top: 0; }
+}
 
-  .dashboard-header {
-    .muted { color: $muted; font-size: 14px; margin: 0; }
+/* ---------- Header ---------- */
+.dashboard-page .dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  .muted {
+    color: $muted;
+    font-size: 14px;
+    margin: 0;
   }
 
-  // ---- two charts side by side, no card wrappers ----
-  .charts-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 28px;
-    align-items: flex-start;
-
-    @media (max-width: 1100px) {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .radar-chart {
-    // no background / border / padding on purpose
-    min-width: 0;                 // allow flex/grid child to shrink
-    display: flex;
-    justify-content: center;
+  .week-nav {
+    display: inline-flex;
     align-items: center;
+    gap: 8px;
+
+    button {
+      background: $surface;
+      border: 1px solid $border;
+      color: $text;
+      height: 34px;
+      min-width: 34px;
+      padding: 0 12px;
+      border-radius: $radius-sm;
+      font-size: 13px;
+      transition: $transition;
+
+      &:hover { background: $bg; }
+    }
+
+    .week-nav-today {
+      font-weight: 600;
+      color: $muted;
+
+      &:hover { color: $text; }
+    }
   }
 }
 
-// ---- contribution chart (no card wrapper) ----
+/* ============================================================
+   KPI cards
+   ============================================================ */
+.dashboard-page .kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-page .kpi-card {
+  @include card-flex(6px, 16px);
+  align-items: flex-start;
+  text-align: left;
+  border-left: 4px solid $border;
+
+  .kpi-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: $muted;
+  }
+
+  .kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: $text;
+    letter-spacing: -.5px;
+  }
+
+  .kpi-hint {
+    font-size: 12px;
+    color: $muted;
+    opacity: .8;
+  }
+
+  &.accent-green  { border-left-color: $low;     .kpi-value { color: $low; } }
+  &.accent-amber  { border-left-color: $medium;  .kpi-value { color: $medium; } }
+  &.accent-red    { border-left-color: $high;    .kpi-value { color: $high; } }
+  &.accent-violet { border-left-color: $primary; .kpi-value { color: $primary; } }
+}
+
+/* ============================================================
+   Chart grid — named areas
+   - Desktop (≥1101px): 4 columns
+   - Tablet  (641–1100px): 2 columns
+   - Mobile  (≤640px): 1 column
+   ============================================================ */
+.dashboard-page .dashboard-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+
+  grid-template-areas:
+    "radar   radar   trend    trend"
+    "donut   bars    streak   streak"
+    "contrib contrib upcoming upcoming";
+
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "radar    radar"
+      "trend    trend"
+      "donut    bars"
+      "streak   streak"
+      "contrib  contrib"
+      "upcoming upcoming";
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "radar"
+      "trend"
+      "donut"
+      "bars"
+      "streak"
+      "contrib"
+      "upcoming";
+  }
+}
+
+.dashboard-page .grid-radar    { grid-area: radar;    min-width: 0; }
+.dashboard-page .grid-trend    { grid-area: trend;    min-width: 0; }
+.dashboard-page .grid-donut    { grid-area: donut;    min-width: 0; }
+.dashboard-page .grid-bars     { grid-area: bars;     min-width: 0; }
+.dashboard-page .grid-streak   { grid-area: streak;   min-width: 0; }
+.dashboard-page .grid-contrib  { grid-area: contrib;  min-width: 0; }
+.dashboard-page .grid-upcoming { grid-area: upcoming; min-width: 0; }
+
+/* Cells stretch their content to full height so rows align. */
+.dashboard-page .grid-radar > *,
+.dashboard-page .grid-trend > *,
+.dashboard-page .grid-donut > *,
+.dashboard-page .grid-bars > *,
+.dashboard-page .grid-streak > *,
+.dashboard-page .grid-contrib > *,
+.dashboard-page .grid-upcoming > * {
+  height: 100%;
+}
+
+/* ============================================================
+   Chart card chrome (used by trend, donut, bars, streak, upcoming)
+   The radar and contribution chart intentionally have no chrome.
+   ============================================================ */
+.dashboard-page .chart-card {
+  @include card-flex(12px, 18px);
+  min-width: 0;
+  height: 100%;
+
+  .chart-head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    h2 {
+      margin: 0;
+      font-size: 16px;
+      color: $text;
+    }
+
+    .muted {
+      margin: 0;
+      font-size: 12px;
+      color: $muted;
+    }
+  }
+
+  .chart-link {
+    margin-top: auto;
+    align-self: flex-start;
+    font-size: 13px;
+    font-weight: 600;
+    color: $primary;
+    text-decoration: none;
+    transition: $transition;
+
+    &:hover { text-decoration: underline; }
+  }
+
+  .empty-state {
+    flex: 1;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $muted;
+    font-size: 13px;
+    opacity: .75;
+  }
+}
+
+/* ============================================================
+   Streaks card body
+   ============================================================ */
+.dashboard-page .streak-grid {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  padding: 4px 0 8px;
+}
+
+.dashboard-page .streak {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .streak-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: $muted;
+  }
+
+  .streak-value {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1;
+    color: $text;
+    letter-spacing: -1px;
+  }
+
+  .streak-unit {
+    font-size: 12px;
+    color: $muted;
+    opacity: .8;
+  }
+}
+
+.dashboard-page .streak-footer {
+  margin-top: auto;
+  font-size: 12px;
+  color: $muted;
+}
+
+/* ============================================================
+   Upcoming list
+   ============================================================ */
+.dashboard-page .upcoming-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dashboard-page .upcoming-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  border-left: 3px solid $border;
+  font-size: 13px;
+  background: $surface;
+
+  &.priority-low    { border-left-color: $low; }
+  &.priority-medium { border-left-color: $medium; }
+  &.priority-high   { border-left-color: $high; }
+
+  .upcoming-date {
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    color: $muted;
+    min-width: 40px;
+  }
+
+  .upcoming-title {
+    flex: 1;
+    min-width: 0;
+    color: $text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .upcoming-period {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .priority-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    flex: 0 0 auto;
+
+    &.low    { @include priority-color($low); }
+    &.medium { @include priority-color($medium); }
+    &.high   { @include priority-color($high); }
+  }
+}
+
+/* ============================================================
+   Radar chart (bare — no card chrome)
+   ============================================================ */
+.dashboard-page .radar-chart {
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ============================================================
+   Contribution chart (bare — no card chrome)
+   ============================================================ */
 .contrib-chart {
   display: flex;
   flex-direction: column;
@@ -140,7 +445,7 @@
     &:hover { transform: none; }
   }
 }
-// at the end of _dashboard.scss
+
 [data-theme='dark'] .contrib-chart {
   .contrib-square {
     background: #1c1f28;
@@ -151,4 +456,15 @@
     &.level-4     { background: #39d353; }
     &.level-empty { background: transparent; }
   }
+}
+
+/* ============================================================
+   Recharts tooltip — theme-aware
+   ============================================================ */
+.recharts-default-tooltip {
+  background: $surface !important;
+  border: 1px solid $border !important;
+  border-radius: $radius-sm !important;
+  font-size: 13px !important;
+  color: $text !important;
 }

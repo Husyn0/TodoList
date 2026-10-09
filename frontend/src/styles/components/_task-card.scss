@@ -118,7 +118,26 @@
     color: $muted;
     font-style: italic;
   }
+  
+  .task-period {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: $radius-pill;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    width: fit-content;
 
+    /* Reuse the same hue family as priority so it reads as "meta". */
+    &.period-morning   { @include priority-color($medium); }
+    &.period-afternoon { @include priority-color($high); }
+    &.period-evening   { @include priority-color($primary); }
+    &.period-night     { @include priority-color($muted); }
+  }
+  
   &.repeated {
     cursor: default;
     background: #fafbff;

@@ -77,6 +77,47 @@ export const activeWeekdays = (weekStart = 'monday', weekEnd = 'sunday') => {
   }
   return days;
 };
+
+/**
+ * Anchor date: the date (in the current calendar week) corresponding to
+ * `weekStart` for the week containing `date`.
+ */
+export const anchorWeekStart = (date, weekStart = 'monday') => {
+  const target = WEEKDAY_ORDER.indexOf(weekStart);
+  const d = new Date(date);
+  const currentKey = DAY_KEY_BY_INDEX[d.getDay()];
+  const current = WEEKDAY_ORDER.indexOf(currentKey);
+  const diffToMonday = (current + 7) % 7;
+  d.setDate(d.getDate() - diffToMonday);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + target);
+  return d;
+};
+
+/** YYYY-MM-DD for a Date (local, not UTC-shifted). */
+export const toKey = (d) => {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  const y = x.getFullYear();
+  const m = String(x.getMonth() + 1).padStart(2, '0');
+  const day = String(x.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+/** Parse YYYY-MM-DD as a local Date (avoid TZ shift). */
+export const fromKey = (key) => {
+  if (!key) return null;
+  const [y, m, d] = key.split('-').map(Number);
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+};
+
+/** Shift a week-start key by ±n weeks. */
+export const shiftWeek = (key, offset) => {
+  const d = fromKey(key) || new Date();
+  d.setDate(d.getDate() + offset * 7);
+  return toKey(d);
+};
 // ---------- backend <-> frontend mapping ----------
 export const normalizeTask = (t) => ({
   ...t,
@@ -179,3 +220,47 @@ export const meetingTimeForOccurrence = (tracks, task, dateKey) => {
   const mt = tracks[k]?.meeting_time ?? task.meeting_time ?? '';
   return (mt || '').slice(0, 5);
 };
+
+/** First day of the month containing `date` (local). */
+export const startOfMonth = (date) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(1);
+  return d;
+};
+
+/** Last day of the month containing `date` (local). */
+export const endOfMonth = (date) => {
+  const d = startOfMonth(date);
+  d.setMonth(d.getMonth() + 1);
+  d.setDate(0);
+  return d;
+};
+
+/** Shift a Date by ±n months. */
+export const shiftMonth = (date, offset) => {
+  const d = new Date(date);
+  d.setDate(1);              // avoid month-end rollover surprises
+  d.setMonth(d.getMonth() + offset);
+  return d;
+};
+
+/** Every day of the month containing `date`, as Date objects. */
+export const daysOfMonth = (date) => {
+  const start = startOfMonth(date);
+  const end = endOfMonth(date);
+  const out = [];
+  const cur = new Date(start);
+  while (cur <= end) {
+    out.push(new Date(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return out;
+};
+
+/** Short label for a day in a month bar chart (e.g. "5"). */
+export const dayLabel = (d) => String(d.getDate());
+
+/** Month title, e.g. "October 2026". */
+export const monthLabel = (d) =>
+  d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });

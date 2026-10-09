@@ -110,3 +110,25 @@
   background: rgba($color, .15);
   color: $color;
 }
+/* _mixins.scss */
+@mixin segmented {
+  display: inline-flex;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  background: $surface;
+
+  button {
+    border: 0;
+    background: transparent;
+    color: $muted;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: $transition;
+
+    & + button { border-left: 1px solid $border; }
+    &:hover:not(.active) { color: $text; background: $bg; }
+    &.active { background: $primary; color: #fff; }
+  }
+}
