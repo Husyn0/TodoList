@@ -69,7 +69,7 @@ export default function MonthCalendar({
   const { weeks, spanDays, inMonth } = buildMonthMatrix(anchor, weekStartKey, weekEndKey);
   const today = todayKey();
 
-  // Header row in the user's week order
+  // Weekday header row in the user's week order
   const headerKeys = [];
   {
     let i = WEEKDAY_ORDER.indexOf(weekStartKey);
@@ -120,15 +120,27 @@ export default function MonthCalendar({
                   <div className="month-cell-body">
                     {list.map((t) => {
                       const status = statusForOccurrence(tracks, t, key);
+                      const isRepeated = t.repeat && t.repeat.preset !== 'none';
+
                       return (
                         <button
                           key={t.id}
                           type="button"
-                          className={`month-chip status-${status} priority-${t.priority}`}
-                          title={t.title}
+                          className={[
+                            'month-chip',
+                            `status-${status}`,
+                            `priority-${t.priority}`,
+                            isRepeated ? 'repeated' : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                          title={isRepeated ? `${t.title} (repeats)` : t.title}
                           onClick={() => onEdit(t, key)}
                         >
-                          {t.title}
+                          {isRepeated && (
+                            <span className="month-chip-glyph" aria-hidden="true">↻</span>
+                          )}
+                          <span className="month-chip-title">{t.title}</span>
                         </button>
                       );
                     })}

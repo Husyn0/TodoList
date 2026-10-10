@@ -219,7 +219,11 @@
   &::-webkit-scrollbar-track { background: transparent; }
 }
 
+/* ---------- Task chips ---------- */
 .month-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   border: 1px solid $border;
   background: $surface;
   color: $text;
@@ -229,17 +233,46 @@
   font-weight: 500;
   line-height: 1.4;
   text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   border-left-width: 3px;
   transition: $transition;
 
-  &.status-done        { border-left-color: $low;    opacity: .75; text-decoration: line-through; }
+  /* title truncates, glyph stays fixed */
+  .month-chip-glyph {
+    flex: 0 0 auto;
+    font-size: 10px;
+    line-height: 1;
+    color: $primary;
+  }
+
+  .month-chip-title {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---- status accents (left border) ---- */
+  &.status-done        { border-left-color: $low;    opacity: .75; }
+  &.status-done .month-chip-title { text-decoration: line-through; }
   &.status-in_progress { border-left-color: $medium; }
-  &.status-pending     { border-left-color: $muted; }
+  &.status-pending     { border-left-color: $muted;  }
+
+  /* ---- recurring: dashed border + tint + italic ---- */
+  &.repeated {
+    border-style: dashed;
+    border-left-style: solid;   /* keep the status color legible */
+    background: rgba($primary, .06);
+    font-style: italic;
+
+    .month-chip-glyph {
+      font-style: normal;
+      opacity: .85;
+    }
+  }
 
   &:hover { background: $bg; }
+  &.repeated:hover { background: rgba($primary, .12); }
 }
 
 .month-cell-add {
