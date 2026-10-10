@@ -17,7 +17,7 @@ export default function TaskCard({
 }) {
   const isRepeated = task.repeat && task.repeat.preset !== 'none';
   const repeatLabel = describeRepeat(task.repeat);
-  const periodLabel = describePeriod(task.period);   // NEW
+  const periodLabel = describePeriod(task.period);
 
   // prefer the per-occurrence values, fall back to the task's own
   const status = occurrenceStatus ?? task.status ?? 'pending';
@@ -72,7 +72,6 @@ export default function TaskCard({
         </div>
       )}
 
-      {/* NEW: period badge */}
       {periodLabel && (
         <div className={`task-period period-${task.period}`}>{periodLabel}</div>
       )}
@@ -88,8 +87,22 @@ export default function TaskCard({
 
         {!preview && (
           <div className="task-actions">
-            <button onClick={(e) => { e.stopPropagation(); onEdit?.(task); }}>✎</button>
-            <button onClick={(e) => { e.stopPropagation(); onDelete?.(task.id); }}>🗑</button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(task, occurrenceDate);
+              }}
+            >
+              ✎
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(task.id, occurrenceDate);
+              }}
+            >
+              🗑
+            </button>
           </div>
         )}
       </div>

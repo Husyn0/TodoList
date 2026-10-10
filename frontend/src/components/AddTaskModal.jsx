@@ -10,15 +10,26 @@ import {
 
 export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
   const isEditing = !!task;
+  const isRepeated = task?.repeat && task.repeat.preset !== 'none';
+
+  // Initial due_date:
+  //  - Edit-mode: the occurrence the user clicked (initialDate), falling back
+  //    to the task's own due_date if none was supplied.
+  //  - Add-mode:  the clicked day, else today.
+  const initialDueDate =
+    initialDate
+    || task?.due_date?.split('T')[0]
+    || todayKey();
+
   const [form, setForm] = useState({
     title: task?.title || '',
     description: task?.description || '',
-    due_date: task?.due_date?.split('T')[0] || initialDate || todayKey(),
+    due_date: initialDueDate,
     priority: task?.priority || 'medium',
     status: task?.status || 'pending',
     position: task?.position ?? 0,
     meeting_time: (task?.meeting_time || '').slice(0, 5),
-    period: task?.period || '',                       // NEW
+    period: task?.period || '',
     repeat: task?.repeat || DEFAULT_REPEAT,
   });
   const [saving, setSaving] = useState(false);
@@ -38,7 +49,15 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
     e.preventDefault();
     setError('');
 
-    if (isPastDate(form.due_date)) {
+    // Only block when creating a new task, or when an existing task's
+    // due_date was changed to a past day. Editing a recurring task's
+    // metadata (title, priority, period, etc.) with an unchanged anchor
+    // is fine even if the anchor is in the past.
+    const originalDue = task?.due_date?.split('T')[0];
+    const dueChanged = form.due_date !== originalDue;
+    const blocksForPast = !isEditing || dueChanged;
+
+    if (blocksForPast && isPastDate(form.due_date)) {
       setError('You can’t schedule a task in the past.');
       return;
     }
@@ -132,7 +151,6 @@ export default function AddTaskModal({ initialDate, task, onClose, onSave }) {
           </label>
         </div>
 
-        {/* NEW: Period */}
         <label>
           Period of day
           <select

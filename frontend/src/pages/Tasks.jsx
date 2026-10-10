@@ -5,12 +5,13 @@ import AddTaskModal from '../components/AddTaskModal';
 import TasksHeader from '../components/tasks/TasksHeader';
 import WeekBoard from '../components/tasks/WeekBoard';
 import TimeFrameChart from '../components/tasks/TimeFrameChart';
+import MonthCalendar from '../components/tasks/MonthCalendar';
 import { tasksApi, tracksApi } from '../api';
 import { useAuth } from '../context/AuthContext';
-import MonthCalendar from '../components/tasks/MonthCalendar';
 import {
   occursOnDate,
   isPastDate,
+  isLockedOccurrence,
   trackKey,
   statusForOccurrence,
   todayKey,
@@ -56,7 +57,7 @@ export default function Tasks() {
     return anchorWeekStart(new Date(), weekStartKey);
   }, [view, urlWeek, urlMonth, weekStartKey]);
 
-  // Days to display (used by chart). In week view, also drives the board.
+  // Days to display (used by chart + board)
   const days = useMemo(() => {
     if (view === 'month') return MONTH_DAYS(anchorDate);
     const keys = activeWeekdays(weekStartKey, weekEndKey);
@@ -70,13 +71,17 @@ export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [tracks, setTracks] = useState({});
   const [activeTask, setActiveTask] = useState(null);
-  const [modal, setModal] = useState({ open: false, date: null, task: null });
+  const [modal, setModal] = useState({
+    open: false,
+    date: null,
+    task: null,
+    occurrenceDate: null,
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  // Fetch tasks for the whole span so the chart has data for every bar.
   const load = useCallback(() => {
     if (!days.length) return;
     const from = toKey(days[0]);
@@ -87,7 +92,6 @@ export default function Tasks() {
       tracksApi.getTracks(from, to).then(setTracks);
     } else {
       tasksApi.getTasksRange(from, to).then(setTasks);
-      // tracks still scoped to the visible month, for board-less month view
       tracksApi.getTracks(from, to).then(setTracks);
     }
   }, [days, view]);
@@ -118,8 +122,15 @@ export default function Tasks() {
     const targetDate = over.id;
     const task = tasks.find((t) => t.id === taskId);
     if (!task) return;
-    if (task.repeat && task.repeat.preset !== 'none') return;
+    if (task.repeat && task.repeat.preset !== 'none') return;   // recurring: not draggable
     if (task.due_date?.split('T')[0] === targetDate) return;
+
+    // Block dropping onto a past day.
+    if (isPastDate(targetDate)) {
+      alert('You can’t move a task to a past day.');
+      load();
+      return;
+    }
 
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, due_date: targetDate } : t))
@@ -141,21 +152,38 @@ export default function Tasks() {
   };
 
   const handleSave = async (payload) => {
-    if (isPastDate(payload.due_date)) {
-      alert('You can’t schedule a task in the past.');
-      return;
+    // Past-date check is enforced inside AddTaskModal, but keep a defensive
+    // copy here so any programmatic call is also guarded.
+    const isEditing = !!modal.task;
+    const originalDue = modal.task?.due_date?.split('T')[0];
+    const dueChanged = payload.due_date !== originalDue;
+    const blocksForPast = !isEditing || dueChanged;
+
+    if (blocksForPast && isPastDate(payload.due_date)) {
+      throw new Error('Cannot schedule in the past');
     }
-    if (modal.task) {
+
+    if (isEditing) {
       const data = await tasksApi.updateTask(modal.task.id, payload);
       setTasks((prev) => prev.map((t) => (t.id === modal.task.id ? data : t)));
     } else {
       const data = await tasksApi.createTask(payload);
       setTasks((prev) => [...prev, data]);
     }
-    setModal({ open: false, date: null, task: null });
+    setModal({ open: false, date: null, task: null, occurrenceDate: null });
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, occurrenceDate) => {
+    const task = tasks.find((t) => t.id === id);
+    if (!task) return;
+
+    // Recurring: block only if the clicked occurrence is in the past.
+    // One-shot: block if the task's own due_date is in the past.
+    if (isLockedOccurrence(task, occurrenceDate)) {
+      alert('You can’t delete a past task.');
+      return;
+    }
+
     if (!confirm('Delete this task?')) return;
     await tasksApi.deleteTask(id);
     setTasks((prev) => prev.filter((t) => t.id !== id));
@@ -169,7 +197,7 @@ export default function Tasks() {
     });
   };
 
-  // ---------- URL-driven navigation ----------
+  /* ---------- URL-driven navigation ---------- */
   const changeRange = (offset) => {
     setParams((prev) => {
       const p = new URLSearchParams(prev);
@@ -199,7 +227,6 @@ export default function Tasks() {
     setParams((prev) => {
       const p = new URLSearchParams(prev);
       p.set('view', next);
-      // clear the other anchor so the new view starts at "now"
       if (next === 'month') p.delete('week');
       else p.delete('month');
       return p;
@@ -214,8 +241,9 @@ export default function Tasks() {
     return `${first.toLocaleDateString()} – ${last.toLocaleDateString()}`;
   }, [view, anchorDate, days]);
 
-  const chartLabelFor = view === 'month' ? dayLabel : (d) =>
-    d.toLocaleDateString(undefined, { weekday: 'short' });
+  const chartLabelFor = view === 'month'
+    ? dayLabel
+    : (d) => d.toLocaleDateString(undefined, { weekday: 'short' });
 
   const today = todayKey();
   const doneToday = tasks
@@ -250,8 +278,12 @@ export default function Tasks() {
           tracks={tracks}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
-          onAdd={(date) => setModal({ open: true, date, task: null })}
-          onEdit={(task) => setModal({ open: true, date: null, task })}
+          onAdd={(date) =>
+            setModal({ open: true, date, task: null, occurrenceDate: null })
+          }
+          onEdit={(task, occurrenceDate) =>
+            setModal({ open: true, date: null, task, occurrenceDate })
+          }
           onDelete={handleDelete}
           onToggleDone={handleToggleDone}
         />
@@ -264,72 +296,29 @@ export default function Tasks() {
           weekEndKey={weekEndKey}
           tasksByDay={tasksByDay}
           tracks={tracks}
-          onAdd={(date) => setModal({ open: true, date, task: null })}
-          onEdit={(task) => setModal({ open: true, date: null, task })}
+          onAdd={(date) =>
+            setModal({ open: true, date, task: null, occurrenceDate: null })
+          }
+          onEdit={(task, occurrenceDate) =>
+            setModal({ open: true, date: null, task, occurrenceDate })
+          }
         />
       )}
+
       {modal.open && (
         <AddTaskModal
-          initialDate={modal.date || modal.task?.due_date?.split('T')[0]}
+          initialDate={
+            modal.date
+            || modal.occurrenceDate
+            || modal.task?.due_date?.split('T')[0]
+          }
           task={modal.task}
-          onClose={() => setModal({ open: false, date: null, task: null })}
+          onClose={() =>
+            setModal({ open: false, date: null, task: null, occurrenceDate: null })
+          }
           onSave={handleSave}
         />
       )}
-    </div>
-  );
-}
-
-/* ---------- Month-mode summary list ---------- */
-function MonthList({ days, tasksByDay, tracks, onAdd, onEdit }) {
-  const today = todayKey();
-  return (
-    <div className="month-list">
-      {days.map((d) => {
-        const key = toKey(d);
-        const list = tasksByDay(d);
-        const isToday = key === today;
-        const isPast = key < today;
-        return (
-          <div key={key} className={`month-row ${isToday ? 'is-today' : ''} ${isPast ? 'is-past' : ''}`}>
-            <div className="month-row-date">
-              <span className="month-row-day">
-                {d.toLocaleDateString(undefined, { weekday: 'short' })}
-              </span>
-              <span className="month-row-num">{d.getDate()}</span>
-            </div>
-            <div className="month-row-tasks">
-              {list.length === 0 ? (
-                <span className="month-row-empty">—</span>
-              ) : (
-                list.map((t) => {
-                  const status = statusForOccurrence(tracks, t, key);
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      className={`month-chip status-${status} priority-${t.priority}`}
-                      onClick={() => onEdit(t)}
-                      title={t.title}
-                    >
-                      {t.title}
-                    </button>
-                  );
-                })
-              )}
-            </div>
-            <button
-              type="button"
-              className="month-row-add"
-              disabled={isPast}
-              onClick={() => !isPast && onAdd(key)}
-              title={isPast ? 'Can’t add tasks to a past day' : 'Add task'}
-            >
-              +
-            </button>
-          </div>
-        );
-      })}
     </div>
   );
 }

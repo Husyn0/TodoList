@@ -40,6 +40,7 @@ export const DEFAULT_REPEAT = { preset: 'none', days: [] };
 export const DAY_KEY_BY_INDEX = [
   'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday',
 ];
+
 // Ordered list of weekday keys Mon→Sun (matching WEEKDAYS order)
 export const WEEKDAY_ORDER = [
   'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
@@ -50,79 +51,14 @@ export const JS_DAY_TO_ORDER = {
   1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 0: 6,
 };
 
-/**
- * Return the list of weekday keys between `weekStart` and `weekEnd`
- * inclusive, following the WEEKDAY_ORDER (Monday-first) sequence.
- *
- * Example:
- *   weekStart='monday', weekEnd='friday' → ['monday','tuesday','wednesday','thursday','friday']
- *   weekStart='sunday', weekEnd='sunday' → ['sunday']
- *   weekStart='monday', weekEnd='sunday' → all 7 days
- */
-export const activeWeekdays = (weekStart = 'monday', weekEnd = 'sunday') => {
-  const startIdx = WEEKDAY_ORDER.indexOf(weekStart);
-  const endIdx   = WEEKDAY_ORDER.indexOf(weekEnd);
-  if (startIdx === -1 || endIdx === -1) return WEEKDAY_ORDER;
+/* ============================================================
+   Backend <-> frontend mapping
+   ============================================================ */
 
-  const days = [];
-  let i = startIdx;
-  // walk forward through the cycle until we hit endIdx
-  while (true) {
-    days.push(WEEKDAY_ORDER[i]);
-    if (i === endIdx) break;
-    i = (i + 1) % 7;
-    // safety net if start===end we stop after 1; otherwise guard against
-    // running away (shouldn't happen since WEEKDAY_ORDER is length 7)
-    if (days.length > 7) break;
-  }
-  return days;
-};
-
-/**
- * Anchor date: the date (in the current calendar week) corresponding to
- * `weekStart` for the week containing `date`.
- */
-export const anchorWeekStart = (date, weekStart = 'monday') => {
-  const target = WEEKDAY_ORDER.indexOf(weekStart);
-  const d = new Date(date);
-  const currentKey = DAY_KEY_BY_INDEX[d.getDay()];
-  const current = WEEKDAY_ORDER.indexOf(currentKey);
-  const diffToMonday = (current + 7) % 7;
-  d.setDate(d.getDate() - diffToMonday);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() + target);
-  return d;
-};
-
-/** YYYY-MM-DD for a Date (local, not UTC-shifted). */
-export const toKey = (d) => {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  const y = x.getFullYear();
-  const m = String(x.getMonth() + 1).padStart(2, '0');
-  const day = String(x.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-};
-
-/** Parse YYYY-MM-DD as a local Date (avoid TZ shift). */
-export const fromKey = (key) => {
-  if (!key) return null;
-  const [y, m, d] = key.split('-').map(Number);
-  if (!y || !m || !d) return null;
-  return new Date(y, m - 1, d);
-};
-
-/** Shift a week-start key by ±n weeks. */
-export const shiftWeek = (key, offset) => {
-  const d = fromKey(key) || new Date();
-  d.setDate(d.getDate() + offset * 7);
-  return toKey(d);
-};
-// ---------- backend <-> frontend mapping ----------
 export const normalizeTask = (t) => ({
   ...t,
   due_date: t.due_date ? String(t.due_date).split('T')[0] : t.due_date,
-  meeting_time: (t.meeting_time || '').slice(0, 5),   // "09:30:00" → "09:30"
+  meeting_time: (t.meeting_time || '').slice(0, 5),
   period: t.period || null,
   repeat: {
     preset: t.repeat_preset ?? 'none',
@@ -137,7 +73,7 @@ export const denormalizeTask = (form) => {
   // <input type="time"> may yield "HH:MM" or "HH:MM:SS"; normalize to "HH:MM".
   let mt = null;
   if (meeting_time) {
-    mt = String(meeting_time).slice(0, 5);   // "09:30:00" → "09:30", "09:30" → "09:30"
+    mt = String(meeting_time).slice(0, 5);
   }
 
   return {
@@ -149,7 +85,10 @@ export const denormalizeTask = (form) => {
   };
 };
 
-// ---------- UI helpers ----------
+/* ============================================================
+   UI helpers
+   ============================================================ */
+
 export const describeRepeat = (repeat) => {
   if (!repeat || repeat.preset === 'none') return null;
   if (repeat.preset === 'daily')  return 'Every day';
@@ -169,6 +108,10 @@ export const describePeriod = (period) => {
   const found = PERIODS.find((p) => p.value === period);
   return found ? `${PERIOD_ICON[period] || ''} ${found.label}`.trim() : period;
 };
+
+/* ============================================================
+   Occurrence logic
+   ============================================================ */
 
 /**
  * Does this task occur on the given Date?
@@ -197,11 +140,45 @@ export const occursOnDate = (task, date) => {
   return key === dueKey;
 };
 
-// ---------- date helpers ----------
+/* ============================================================
+   Recurring-task action guards
+   ============================================================ */
+
+/**
+ * The effective date of an action for a task + occurrence.
+ *  - Recurring task: the clicked occurrence date (may be today or future).
+ *  - One-shot task: its own due_date.
+ */
+export const effectiveDate = (task, occurrenceDate) => {
+  const isRepeated = task?.repeat && task.repeat.preset !== 'none';
+  if (isRepeated && occurrenceDate) return occurrenceDate;
+  return task?.due_date?.split('T')[0];
+};
+
+/**
+ * Should this action be blocked because the effective date is in the past?
+ *  - Non-recurring: locked if due_date < today.
+ *  - Recurring:     locked if the clicked occurrence < today.
+ *  - When no occurrence date is passed for a recurring task, fall back to
+ *    the anchor (due_date).
+ */
+export const isLockedOccurrence = (task, occurrenceDate) => {
+  const d = effectiveDate(task, occurrenceDate);
+  if (!d) return false;
+  return isPastDate(d);
+};
+
+/* ============================================================
+   Date helpers
+   ============================================================ */
+
 export const todayKey = () => {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
-  return d.toISOString().split('T')[0];
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 };
 
 export const isPastDate = (key) => {
@@ -209,7 +186,111 @@ export const isPastDate = (key) => {
   return key < todayKey();
 };
 
-// ---------- track helpers ----------
+/** Anchor date: the date (in the current calendar week) corresponding to
+ *  `weekStart` for the week containing `date`. */
+export const anchorWeekStart = (date, weekStart = 'monday') => {
+  const target = WEEKDAY_ORDER.indexOf(weekStart);
+  const d = new Date(date);
+  const currentKey = DAY_KEY_BY_INDEX[d.getDay()];
+  const current = WEEKDAY_ORDER.indexOf(currentKey);
+  const diffToMonday = (current + 7) % 7;
+  d.setDate(d.getDate() - diffToMonday);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + target);
+  return d;
+};
+
+/** YYYY-MM-DD for a Date (local, not UTC-shifted). */
+export const toKey = (d) => {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  const y = x.getFullYear();
+  const m = String(x.getMonth() + 1).padStart(2, '0');
+  const day = String(x.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+/** Parse YYYY-MM-DD as a local Date. */
+export const fromKey = (key) => {
+  if (!key) return null;
+  const [y, m, d] = key.split('-').map(Number);
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+};
+
+/** Shift a YYYY-MM-DD key by ±n calendar weeks. */
+export const shiftWeek = (key, offset) => {
+  const d = fromKey(key) || new Date();
+  d.setDate(d.getDate() + offset * 7);
+  return toKey(d);
+};
+
+/* ============================================================
+   Month helpers
+   ============================================================ */
+
+export const startOfMonth = (date) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(1);
+  return d;
+};
+
+export const endOfMonth = (date) => {
+  const d = startOfMonth(date);
+  d.setMonth(d.getMonth() + 1);
+  d.setDate(0);
+  return d;
+};
+
+export const shiftMonth = (date, offset) => {
+  const d = new Date(date);
+  d.setDate(1);
+  d.setMonth(d.getMonth() + offset);
+  return d;
+};
+
+export const daysOfMonth = (date) => {
+  const start = startOfMonth(date);
+  const end = endOfMonth(date);
+  const out = [];
+  const cur = new Date(start);
+  while (cur <= end) {
+    out.push(new Date(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return out;
+};
+
+export const dayLabel = (d) => String(d.getDate());
+
+export const monthLabel = (d) =>
+  d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+/**
+ * Return the list of weekday keys between `weekStart` and `weekEnd`
+ * inclusive, following the WEEKDAY_ORDER (Monday-first) sequence.
+ */
+export const activeWeekdays = (weekStart = 'monday', weekEnd = 'sunday') => {
+  const startIdx = WEEKDAY_ORDER.indexOf(weekStart);
+  const endIdx   = WEEKDAY_ORDER.indexOf(weekEnd);
+  if (startIdx === -1 || endIdx === -1) return WEEKDAY_ORDER;
+
+  const days = [];
+  let i = startIdx;
+  while (true) {
+    days.push(WEEKDAY_ORDER[i]);
+    if (i === endIdx) break;
+    i = (i + 1) % 7;
+    if (days.length > 7) break;
+  }
+  return days;
+};
+
+/* ============================================================
+   Track helpers
+   ============================================================ */
+
 export const trackKey = (taskId, dateKey) => `${taskId}__${dateKey}`;
 
 // Fallback status when no track exists yet.
@@ -225,47 +306,3 @@ export const meetingTimeForOccurrence = (tracks, task, dateKey) => {
   const mt = tracks[k]?.meeting_time ?? task.meeting_time ?? '';
   return (mt || '').slice(0, 5);
 };
-
-/** First day of the month containing `date` (local). */
-export const startOfMonth = (date) => {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(1);
-  return d;
-};
-
-/** Last day of the month containing `date` (local). */
-export const endOfMonth = (date) => {
-  const d = startOfMonth(date);
-  d.setMonth(d.getMonth() + 1);
-  d.setDate(0);
-  return d;
-};
-
-/** Shift a Date by ±n months. */
-export const shiftMonth = (date, offset) => {
-  const d = new Date(date);
-  d.setDate(1);              // avoid month-end rollover surprises
-  d.setMonth(d.getMonth() + offset);
-  return d;
-};
-
-/** Every day of the month containing `date`, as Date objects. */
-export const daysOfMonth = (date) => {
-  const start = startOfMonth(date);
-  const end = endOfMonth(date);
-  const out = [];
-  const cur = new Date(start);
-  while (cur <= end) {
-    out.push(new Date(cur));
-    cur.setDate(cur.getDate() + 1);
-  }
-  return out;
-};
-
-/** Short label for a day in a month bar chart (e.g. "5"). */
-export const dayLabel = (d) => String(d.getDate());
-
-/** Month title, e.g. "October 2026". */
-export const monthLabel = (d) =>
-  d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });

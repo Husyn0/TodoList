@@ -15,37 +15,30 @@ const WEEKDAY_LABELS = {
   sunday:    'Sun',
 };
 
-/**
- * Builds a calendar matrix for the month that contains `anchor`.
- * Each row is a full week; the first and last weeks are padded with
- * `null` so the grid always starts on `weekStart` and ends on `weekEnd`.
- */
+const JS_TO_KEY = [
+  'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday',
+];
+
 const buildMonthMatrix = (anchor, weekStartKey, weekEndKey) => {
   const start = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
   const end   = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0);
-
-  // JS Date.getDay(): 0=Sun..6=Sat
-  const JS_TO_KEY = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 
   const startIdx = WEEKDAY_ORDER.indexOf(weekStartKey);
   const endIdx   = WEEKDAY_ORDER.indexOf(weekEndKey);
   const spanDays = endIdx >= startIdx
     ? endIdx - startIdx + 1
-    : (7 - startIdx) + endIdx + 1;   // wraps past Sunday (e.g. sun → sat)
+    : (7 - startIdx) + endIdx + 1;
 
-  // Walk back from the 1st until we land on weekStart.
   const gridStart = new Date(start);
   while (JS_TO_KEY[gridStart.getDay()] !== weekStartKey) {
     gridStart.setDate(gridStart.getDate() - 1);
   }
 
-  // Walk forward from the last day until we land on weekEnd.
   const gridEnd = new Date(end);
   while (JS_TO_KEY[gridEnd.getDay()] !== weekEndKey) {
     gridEnd.setDate(gridEnd.getDate() + 1);
   }
 
-  // Fill the grid.
   const weeks = [];
   let cursor = new Date(gridStart);
   while (cursor <= gridEnd) {
@@ -57,7 +50,11 @@ const buildMonthMatrix = (anchor, weekStartKey, weekEndKey) => {
     weeks.push(row);
   }
 
-  return { weeks, spanDays, inMonth: (date) => date.getMonth() === anchor.getMonth() };
+  return {
+    weeks,
+    spanDays,
+    inMonth: (date) => date.getMonth() === anchor.getMonth(),
+  };
 };
 
 export default function MonthCalendar({
@@ -72,7 +69,7 @@ export default function MonthCalendar({
   const { weeks, spanDays, inMonth } = buildMonthMatrix(anchor, weekStartKey, weekEndKey);
   const today = todayKey();
 
-  // Header row: labels in the user's week order
+  // Header row in the user's week order
   const headerKeys = [];
   {
     let i = WEEKDAY_ORDER.indexOf(weekStartKey);
@@ -85,11 +82,7 @@ export default function MonthCalendar({
   }
 
   return (
-    <div
-      className="month-calendar"
-      style={{ '--cols': spanDays }}
-    >
-      {/* Weekday header */}
+    <div className="month-calendar" style={{ '--cols': spanDays }}>
       <div className="month-header" style={{ '--cols': spanDays }}>
         {headerKeys.map((k) => (
           <div key={k} className="month-header-cell">
@@ -98,15 +91,14 @@ export default function MonthCalendar({
         ))}
       </div>
 
-      {/* Week rows */}
       <div className="month-grid">
         {weeks.map((row, wi) => (
           <div key={wi} className="month-row">
             {row.map((date) => {
               const key = toKey(date);
-              const isToday  = key === today;
-              const isPast   = key < today;
-              const isOther  = !inMonth(date);
+              const isToday = key === today;
+              const isPast  = key < today;
+              const isOther = !inMonth(date);
               const list = tasksByDay(date);
 
               return (
@@ -117,7 +109,9 @@ export default function MonthCalendar({
                     isToday ? 'is-today' : '',
                     isPast ? 'is-past' : '',
                     isOther ? 'is-other-month' : '',
-                  ].filter(Boolean).join(' ')}
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                 >
                   <header className="month-cell-head">
                     <span className="month-cell-num">{date.getDate()}</span>
@@ -132,7 +126,7 @@ export default function MonthCalendar({
                           type="button"
                           className={`month-chip status-${status} priority-${t.priority}`}
                           title={t.title}
-                          onClick={() => onEdit(t)}
+                          onClick={() => onEdit(t, key)}
                         >
                           {t.title}
                         </button>
