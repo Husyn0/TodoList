@@ -14,7 +14,11 @@
 
   &:hover { box-shadow: $shadow; }
   &.dragging { opacity: .3; }
-  &.preview  { cursor: grabbing; transform: rotate(2deg); box-shadow: $shadow; }
+  &.preview {
+    cursor: grabbing;
+    transform: rotate(2deg);
+    box-shadow: $shadow;
+  }
 
   &.priority-low    { border-left-color: $low; }
   &.priority-medium { border-left-color: $medium; }
@@ -25,13 +29,7 @@
     color: $muted;
   }
 
-  &.repeated {
-    cursor: default;
-    background: #fafbff;
-    border-style: dashed;
-  }
-
-  /* ---------- checkbox + title ---------- */
+  // ---- checkbox + title row ----
   .task-head {
     display: flex;
     align-items: flex-start;
@@ -121,7 +119,6 @@
     font-style: italic;
   }
 
-  /* ---------- period chip ---------- */
   .task-period {
     display: inline-flex;
     align-items: center;
@@ -140,7 +137,13 @@
     &.period-night     { @include priority-color($muted); }
   }
 
-  /* ---------- footer ---------- */
+  // ---- recurring tasks: dashed border + subtle tint (theme-aware) ----
+  &.repeated {
+    cursor: default;
+    background: rgba($primary, .04);
+    border-style: dashed;
+  }
+
   .task-footer {
     display: flex;
     align-items: center;
@@ -149,11 +152,16 @@
   }
 
   .priority-letter {
-    @include chip;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 20px;
     height: 20px;
     border-radius: 6px;
     font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    flex: 0 0 auto;
 
     &.low    { @include priority-color($low); }
     &.medium { @include priority-color($medium); }
