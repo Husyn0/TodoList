@@ -95,6 +95,9 @@ export default function MonthCalendar({
         {weeks.map((row, wi) => (
           <div key={wi} className="month-row">
             {row.map((date) => {
+              // Compute the local "YYYY-MM-DD" key ONCE per cell and use it
+              // everywhere. Do NOT pass `date` (a Date) to any handler — axios
+              // serializes Date via toISOString(), which shifts by timezone.
               const key = toKey(date);
               const isToday = key === today;
               const isPast  = key < today;
@@ -151,7 +154,11 @@ export default function MonthCalendar({
                     className="month-cell-add"
                     disabled={isPast}
                     title={isPast ? 'Can’t add tasks to a past day' : 'Add task'}
-                    onClick={() => !isPast && onAdd(key)}
+                    onClick={() => {
+                      // Defensive: key MUST be a "YYYY-MM-DD" string.
+                      if (typeof key !== 'string' || key.length !== 10) return;
+                      if (!isPast) onAdd(key);
+                    }}
                   >
                     +
                   </button>

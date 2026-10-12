@@ -12,7 +12,6 @@ class TaskController extends Controller
 {
     private const REPEAT_PRESETS = ['none', 'daily', 'weekly', 'custom'];
     private const REPEAT_DAYS    = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-    private const PERIODS        = ['morning','afternoon','evening','night'];
 
     public function index(Request $request)
     {
@@ -109,8 +108,7 @@ class TaskController extends Controller
             'repeat_days'   => ['nullable', 'array'],
             'repeat_days.*' => ['string', Rule::in(self::REPEAT_DAYS)],
             'meeting_time'  => ['nullable', 'date_format:H:i'],
-
-            'period'        => ['sometimes', 'nullable', Rule::in(self::PERIODS)],
+            'period'        => ['sometimes', 'nullable', 'string', 'max:255'],
         ];
     }
 
