@@ -18,7 +18,7 @@ Test mailbox (set once at the top of your shell):
 
 Every id/token is captured into a shell variable. Do NOT copy ids manually.
 Verification links are minted fresh via tinker for automation, but the **email itself is real** — click it in Gmail to confirm end-to-end.
-
+```
 ---
 
 ## 0. Session setup

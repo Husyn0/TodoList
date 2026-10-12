@@ -157,7 +157,7 @@ curl -s "http://localhost:8000/api/tracks?from=2026-10-01&to=2026-10-31" \
   | jq --arg id "$TASK_ID" '[.[] | select(.task_id==($id|tonumber))] | length'
 ```
 Expected: "Deleted" then 0.
-9. Ownership
+# 9. Ownership
 ```bash
 
 EMAIL2="other+$(date +%s)@example.com"
